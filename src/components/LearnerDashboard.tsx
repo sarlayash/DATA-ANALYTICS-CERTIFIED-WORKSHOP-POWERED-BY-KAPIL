@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { DailyProgressCheckin } from './DailyProgressCheckin';
 import {
   GraduationCap,
   Sparkles,
@@ -284,6 +285,9 @@ export const LearnerDashboard: React.FC = () => {
           <span className="text-[10px] text-slate-400 mt-1 block">Official Verification</span>
         </div>
       </div>
+
+      {/* Daily Progress Check-in (Firebase Persisted) */}
+      <DailyProgressCheckin />
 
       {/* Main Focus: Today's Mission & Next Learning Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

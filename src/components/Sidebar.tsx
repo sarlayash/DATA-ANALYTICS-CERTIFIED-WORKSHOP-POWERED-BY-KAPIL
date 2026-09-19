@@ -19,7 +19,8 @@ import {
   Sliders,
   Sparkles,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Clock
 } from 'lucide-react';
 
 export const Sidebar: React.FC<{ collapsed?: boolean; setCollapsed?: (c: boolean) => void }> = ({
@@ -52,6 +53,7 @@ export const Sidebar: React.FC<{ collapsed?: boolean; setCollapsed?: (c: boolean
     { id: 'admin-learners', label: 'Learners Roster', icon: Users },
     { id: 'admin-attendance', label: 'Attendance Manager', icon: CalendarCheck },
     { id: 'admin-grading', label: 'Assignments Grading', icon: FileText },
+    { id: 'admin-checkins', label: 'Daily Check-Ins', icon: Clock },
     { id: 'admin-announcements', label: 'Announcements', icon: Megaphone },
     { id: 'admin-settings', label: 'Weights & Settings', icon: Sliders }
   ];

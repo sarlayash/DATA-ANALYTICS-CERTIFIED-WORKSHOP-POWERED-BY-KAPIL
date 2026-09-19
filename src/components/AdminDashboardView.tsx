@@ -19,7 +19,10 @@ import {
   Plus,
   Filter,
   ShieldCheck,
-  ExternalLink
+  ExternalLink,
+  Clock,
+  Smile,
+  Cloud
 } from 'lucide-react';
 
 export const AdminDashboardView: React.FC = () => {
@@ -31,6 +34,8 @@ export const AdminDashboardView: React.FC = () => {
     certificates,
     announcements,
     settings,
+    checkins,
+    cloudSyncStatus,
     markAttendance,
     gradeAssignment,
     issueCertificate,
@@ -45,10 +50,19 @@ export const AdminDashboardView: React.FC = () => {
     setActiveView
   } = useApp();
 
-  // Internal sub-tab: 'overview' | 'learners' | 'attendance' | 'grading' | 'announcements' | 'settings'
+  // Internal sub-tab: 'overview' | 'learners' | 'attendance' | 'grading' | 'checkins' | 'announcements' | 'settings'
   const [adminTab, setAdminTab] = useState<string>(
     activeView.startsWith('admin-') ? activeView.replace('admin-', '') : 'overview'
   );
+
+  // Keep adminTab in sync when navigating from sidebar
+  React.useEffect(() => {
+    if (activeView.startsWith('admin-')) {
+      setAdminTab(activeView.replace('admin-', ''));
+    } else if (activeView === 'admin') {
+      setAdminTab('overview');
+    }
+  }, [activeView]);
 
   // Search & Filters for Learners table
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,6 +174,7 @@ export const AdminDashboardView: React.FC = () => {
           { id: 'learners', label: 'Learner Roster', icon: Users },
           { id: 'attendance', label: 'Attendance Manager', icon: CalendarCheck },
           { id: 'grading', label: 'Assignment Grading', icon: FileText },
+          { id: 'checkins', label: `Daily Check-Ins (${checkins.length})`, icon: Clock },
           { id: 'announcements', label: 'Announcements', icon: Megaphone },
           { id: 'settings', label: 'Grading Weights', icon: Sliders }
         ].map(t => {
@@ -620,6 +635,83 @@ export const AdminDashboardView: React.FC = () => {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Tab: Daily Progress Check-Ins Audit Ledger (Firebase Firestore) */}
+      {adminTab === 'checkins' && (
+        <div className="space-y-6">
+          <div className="p-6 rounded-3xl bg-slate-800/50 border border-slate-750 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 text-xs font-semibold border border-cyan-500/30 mb-2">
+                <Cloud className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Real-Time Firestore Ledger • {cloudSyncStatus === 'synced' ? 'Cloud Synced' : 'Syncing...'}</span>
+              </div>
+              <h3 className="text-xl font-bold text-white">Learner Daily Check-Ins & Self-Efficacy</h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Authentic logs of study hours, concept takeaways, confidence ratings, and learner blockers.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="px-4 py-2 rounded-2xl bg-slate-900 border border-slate-750 text-xs text-slate-300">
+                <span className="text-slate-400">Total Check-Ins:</span>{' '}
+                <span className="font-bold text-white">{checkins.length}</span>
+              </div>
+            </div>
+          </div>
+
+          {checkins.length === 0 ? (
+            <div className="p-12 text-center rounded-3xl bg-slate-800/40 border border-slate-750 space-y-2">
+              <Clock className="w-8 h-8 text-slate-500 mx-auto" />
+              <p className="text-sm font-semibold text-slate-300">No daily check-ins recorded yet</p>
+              <p className="text-xs text-slate-500 max-w-md mx-auto">
+                Learners can submit their daily study hours, takeaways, and confidence ratings from the Learner Dashboard.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {checkins.map(ck => (
+                <div key={ck.id} className="p-5 rounded-2xl bg-slate-800/60 border border-slate-750 space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-750">
+                    <div>
+                      <h4 className="font-bold text-white text-sm">{ck.learnerName}</h4>
+                      <span className="text-[11px] text-indigo-400 font-mono">Day {ck.day} • {ck.date}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 text-xs font-mono font-bold">
+                        {ck.hoursSpent} hrs
+                      </span>
+                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
+                        {ck.confidenceRating}/5 Confidence
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Topics Practiced:</span>
+                    <p className="text-xs text-slate-200 mt-0.5 font-medium">{ck.topicsCovered}</p>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Key Takeaway:</span>
+                    <p className="text-xs text-slate-300 mt-0.5 italic bg-slate-900/60 p-2.5 rounded-xl border border-slate-750">
+                      "{ck.keyTakeaway}"
+                    </p>
+                  </div>
+
+                  {ck.blockersOrDoubts && (
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block text-[11px]">Learner Query / Blocker:</span>
+                        <span>{ck.blockersOrDoubts}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

@@ -72,10 +72,12 @@ const MainAppContent: React.FC = () => {
         return <CertificationView />;
       case 'leaderboard':
         return <LeaderboardView />;
+      case 'admin':
       case 'admin-overview':
       case 'admin-learners':
       case 'admin-attendance':
       case 'admin-grading':
+      case 'admin-checkins':
       case 'admin-announcements':
       case 'admin-settings':
         return <AdminDashboardView />;

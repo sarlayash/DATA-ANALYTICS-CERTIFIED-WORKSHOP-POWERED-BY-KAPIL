@@ -132,6 +132,26 @@
         "pinned": { "type": "boolean" }
       },
       "required": ["id", "title", "content", "createdAt"]
+    },
+    "Checkin": {
+      "title": "Checkin",
+      "description": "Daily learner reflection and progress check-in",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "learnerId": { "type": "string" },
+        "learnerName": { "type": "string" },
+        "day": { "type": "number" },
+        "date": { "type": "string" },
+        "topicsCovered": { "type": "string" },
+        "keyTakeaway": { "type": "string" },
+        "hoursSpent": { "type": "number" },
+        "confidenceRating": { "type": "number" },
+        "blockersOrDoubts": { "type": "string" },
+        "status": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "learnerId", "day", "topicsCovered", "keyTakeaway"]
     }
   },
   "firestore": {
@@ -162,6 +182,10 @@
     "/announcements/{announcementId}": {
       "schema": "Announcement",
       "description": "Program announcements"
+    },
+    "/checkins/{checkinId}": {
+      "schema": "Checkin",
+      "description": "Daily Progress Check-in records submitted by learners"
     }
   }
 }

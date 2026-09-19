@@ -12,7 +12,9 @@ import {
   PortalNotification,
   PortalSettings,
   AttendanceStatus,
-  SkillProficiency
+  SkillProficiency,
+  DailyCheckinRecord,
+  CloudSyncStatus
 } from '../types';
 import { CURRICULUM_DAYS } from '../data/curriculumData';
 import {
@@ -24,6 +26,14 @@ import {
   INITIAL_ATTENDANCE,
   INITIAL_SUBMISSIONS
 } from '../data/initialData';
+import { db } from '../lib/firebase';
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  onSnapshot
+} from 'firebase/firestore';
 
 interface AppContextType {
   currentUser: UserProfile | null;
@@ -45,6 +55,12 @@ interface AppContextType {
   isFirebaseSetupOpen: boolean;
   isAiDrawerOpen: boolean;
   currentVerifyingCertId: string | null;
+
+  // Firebase Firestore Check-ins & Cloud Status
+  checkins: DailyCheckinRecord[];
+  cloudSyncStatus: CloudSyncStatus;
+  submitCheckin: (checkinData: Omit<DailyCheckinRecord, 'id' | 'learnerId' | 'learnerName' | 'date' | 'status' | 'timestamp'>) => Promise<void>;
+  syncFromCloud: () => Promise<void>;
 
   // Actions
   setActiveView: (view: string) => void;
@@ -107,15 +123,39 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load from localStorage or defaults
+  // Load from localStorage or defaults with automatic data migration (clean legacy demo_ prefixes)
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     const saved = localStorage.getItem('da_current_user');
-    return saved ? JSON.parse(saved) : DEMO_LEARNERS[0]; // Start logged in with Aarav for immediate preview
+    if (saved) {
+      const user = JSON.parse(saved);
+      if (user?.uid?.startsWith('demo_')) {
+        user.uid = user.uid.replace(/^demo_/, 'learner_');
+      }
+      return user;
+    }
+    return DEMO_LEARNERS[0]; // Start logged in with Aarav Sharma for immediate preview
   });
 
   const [learners, setLearners] = useState<UserProfile[]>(() => {
     const saved = localStorage.getItem('da_learners');
-    return saved ? JSON.parse(saved) : DEMO_LEARNERS;
+    if (saved) {
+      const list: UserProfile[] = JSON.parse(saved);
+      // If list has stale demo_ IDs, migrate them
+      let migrated = false;
+      const updated = list.map(l => {
+        if (l.uid.startsWith('demo_')) {
+          migrated = true;
+          return { ...l, uid: l.uid.replace(/^demo_/, 'learner_') };
+        }
+        return l;
+      });
+      if (migrated) {
+        localStorage.setItem('da_learners', JSON.stringify(updated));
+        return updated;
+      }
+      return list;
+    }
+    return DEMO_LEARNERS;
   });
 
   const [curriculum, setCurriculum] = useState<CurriculumDay[]>(CURRICULUM_DAYS);
@@ -123,12 +163,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [submissions, setSubmissions] = useState<AssignmentSubmission[]>(() => {
     const saved = localStorage.getItem('da_submissions');
-    return saved ? JSON.parse(saved) : INITIAL_SUBMISSIONS;
+    if (saved) {
+      const list: AssignmentSubmission[] = JSON.parse(saved);
+      let migrated = false;
+      const updated = list.map(s => {
+        if (s.learnerId.startsWith('demo_')) {
+          migrated = true;
+          return { ...s, learnerId: s.learnerId.replace(/^demo_/, 'learner_') };
+        }
+        return s;
+      });
+      if (migrated) {
+        localStorage.setItem('da_submissions', JSON.stringify(updated));
+        return updated;
+      }
+      return list;
+    }
+    return INITIAL_SUBMISSIONS;
   });
 
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(() => {
     const saved = localStorage.getItem('da_attendance');
-    return saved ? JSON.parse(saved) : INITIAL_ATTENDANCE;
+    if (saved) {
+      const list: AttendanceRecord[] = JSON.parse(saved);
+      let migrated = false;
+      const updated = list.map(a => {
+        if (a.learnerId.startsWith('demo_')) {
+          migrated = true;
+          return { ...a, learnerId: a.learnerId.replace(/^demo_/, 'learner_') };
+        }
+        return a;
+      });
+      if (migrated) {
+        localStorage.setItem('da_attendance', JSON.stringify(updated));
+        return updated;
+      }
+      return list;
+    }
+    return INITIAL_ATTENDANCE;
   });
 
   const [skills, setSkills] = useState<SkillItem[]>(() => {
@@ -152,7 +224,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return [
       {
         certificateId: 'SY-DA-2026-0001',
-        learnerId: 'demo_ananya_singh',
+        learnerId: 'learner_ananya_singh',
         learnerName: 'Ananya Singh',
         courseName: '12-Day Job-Oriented Data Analytics Certified Workshop Powered by Kapil',
         duration: '12 Days (Hands-On + Industry Oriented)',
@@ -195,6 +267,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_SETTINGS;
   });
 
+  // Daily Check-ins State
+  const [checkins, setCheckins] = useState<DailyCheckinRecord[]>(() => {
+    const saved = localStorage.getItem('da_checkins');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<CloudSyncStatus>('synced');
+
   // UI Navigation & Modals State
   const [activeView, setActiveView] = useState<string>('dashboard');
   const [selectedDay, setSelectedDay] = useState<number>(1);
@@ -203,6 +282,155 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isFirebaseSetupOpen, setIsFirebaseSetupOpen] = useState<boolean>(false);
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState<boolean>(false);
   const [currentVerifyingCertId, setCurrentVerifyingCertId] = useState<string | null>(null);
+
+  // Firestore Real-time Sync for Checkins
+  useEffect(() => {
+    try {
+      const checkinsCol = collection(db, 'checkins');
+      const unsubscribe = onSnapshot(
+        checkinsCol,
+        snapshot => {
+          const remoteCheckins: DailyCheckinRecord[] = [];
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            remoteCheckins.push({
+              id: docSnap.id,
+              learnerId: data.learnerId,
+              learnerName: data.learnerName,
+              day: data.day,
+              date: data.date,
+              topicsCovered: data.topicsCovered,
+              keyTakeaway: data.keyTakeaway,
+              hoursSpent: data.hoursSpent,
+              confidenceRating: data.confidenceRating,
+              blockersOrDoubts: data.blockersOrDoubts,
+              status: data.status || 'submitted',
+              timestamp: data.timestamp
+            });
+          });
+
+          if (remoteCheckins.length > 0) {
+            setCheckins(prev => {
+              // Merge remote and local by id
+              const map = new Map<string, DailyCheckinRecord>();
+              prev.forEach(item => map.set(item.id, item));
+              remoteCheckins.forEach(item => map.set(item.id, item));
+              const merged = Array.from(map.values()).sort((a, b) => b.day - a.day);
+              localStorage.setItem('da_checkins', JSON.stringify(merged));
+              return merged;
+            });
+            setCloudSyncStatus('synced');
+          }
+        },
+        error => {
+          console.warn('Firestore real-time subscription notice:', error.message);
+          setCloudSyncStatus('offline');
+        }
+      );
+
+      return () => unsubscribe();
+    } catch (err: any) {
+      console.warn('Firestore checkins init note:', err.message);
+    }
+  }, []);
+
+  const syncFromCloud = async () => {
+    setCloudSyncStatus('syncing');
+    try {
+      const checkinsCol = collection(db, 'checkins');
+      const snapshot = await getDocs(checkinsCol);
+      const remoteCheckins: DailyCheckinRecord[] = [];
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        remoteCheckins.push({
+          id: docSnap.id,
+          learnerId: data.learnerId,
+          learnerName: data.learnerName,
+          day: data.day,
+          date: data.date,
+          topicsCovered: data.topicsCovered,
+          keyTakeaway: data.keyTakeaway,
+          hoursSpent: data.hoursSpent,
+          confidenceRating: data.confidenceRating,
+          blockersOrDoubts: data.blockersOrDoubts,
+          status: data.status || 'submitted',
+          timestamp: data.timestamp
+        });
+      });
+
+      if (remoteCheckins.length > 0) {
+        setCheckins(prev => {
+          const map = new Map<string, DailyCheckinRecord>();
+          prev.forEach(item => map.set(item.id, item));
+          remoteCheckins.forEach(item => map.set(item.id, item));
+          const merged = Array.from(map.values()).sort((a, b) => b.day - a.day);
+          localStorage.setItem('da_checkins', JSON.stringify(merged));
+          return merged;
+        });
+      }
+      setCloudSyncStatus('synced');
+    } catch (err: any) {
+      console.warn('Manual cloud sync note:', err.message);
+      setCloudSyncStatus('offline');
+    }
+  };
+
+  const submitCheckin = async (
+    checkinData: Omit<DailyCheckinRecord, 'id' | 'learnerId' | 'learnerName' | 'date' | 'status' | 'timestamp'>
+  ) => {
+    const learnerId = currentUser?.uid || 'learner_aarav_sharma';
+    const learnerName = currentUser?.name || 'Aarav Sharma';
+    const checkinId = `checkin_${learnerId}_day_${checkinData.day}`;
+    const dateStr = new Date().toISOString().split('T')[0];
+    const timestampStr = new Date().toISOString();
+
+    const record: DailyCheckinRecord = {
+      id: checkinId,
+      learnerId,
+      learnerName,
+      day: checkinData.day,
+      date: dateStr,
+      topicsCovered: checkinData.topicsCovered,
+      keyTakeaway: checkinData.keyTakeaway,
+      hoursSpent: checkinData.hoursSpent,
+      confidenceRating: checkinData.confidenceRating,
+      blockersOrDoubts: checkinData.blockersOrDoubts,
+      status: 'submitted',
+      timestamp: timestampStr
+    };
+
+    // Update local state and localStorage immediately
+    setCheckins(prev => {
+      const filtered = prev.filter(c => c.id !== checkinId);
+      const updated = [record, ...filtered];
+      localStorage.setItem('da_checkins', JSON.stringify(updated));
+      return updated;
+    });
+
+    // Persist to Firebase Firestore
+    setCloudSyncStatus('syncing');
+    try {
+      const docRef = doc(db, 'checkins', checkinId);
+      await setDoc(docRef, {
+        learnerId,
+        learnerName,
+        day: checkinData.day,
+        date: dateStr,
+        topicsCovered: checkinData.topicsCovered,
+        keyTakeaway: checkinData.keyTakeaway,
+        hoursSpent: checkinData.hoursSpent,
+        confidenceRating: checkinData.confidenceRating,
+        blockersOrDoubts: checkinData.blockersOrDoubts || '',
+        status: 'submitted',
+        timestamp: timestampStr
+      }, { merge: true });
+
+      setCloudSyncStatus('synced');
+    } catch (err: any) {
+      console.warn('Firestore setDoc checkin note (saved locally):', err.message);
+      setCloudSyncStatus('offline');
+    }
+  };
 
   // Persistence to localStorage
   useEffect(() => {
@@ -691,6 +919,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isFirebaseSetupOpen,
         isAiDrawerOpen,
         currentVerifyingCertId,
+
+        checkins,
+        cloudSyncStatus,
+        submitCheckin,
+        syncFromCloud,
 
         setActiveView,
         setSelectedDay,

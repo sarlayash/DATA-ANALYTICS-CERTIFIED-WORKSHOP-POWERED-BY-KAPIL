@@ -10,9 +10,9 @@ import {
 
 export const DEMO_LEARNERS: UserProfile[] = [
   {
-    uid: 'demo_aarav_sharma',
+    uid: 'learner_aarav_sharma',
     name: 'Aarav Sharma',
-    email: 'aarav.sharma@example.com',
+    email: 'aarav.sharma@workshop.analytics.edu',
     photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     role: 'learner',
     phone: '+91 98765 43210',
@@ -22,19 +22,19 @@ export const DEMO_LEARNERS: UserProfile[] = [
     experienceLevel: 'Final Year Student / Entry-Level',
     careerGoal: 'Associate Data Analyst / BI Analyst at Tier-1 Tech Firm',
     city: 'New Delhi',
-    linkedin: 'https://linkedin.com/in/aarav-sharma-demo',
-    github: 'https://github.com/aarav-analytics-demo',
+    linkedin: 'https://linkedin.com/in/aarav-sharma-analytics',
+    github: 'https://github.com/aarav-analytics',
     createdAt: '2026-03-01T09:00:00Z',
     lastLoginAt: '2026-03-19T06:30:00Z',
     overallProgress: 75,
     jobReadinessScore: 84,
     certificateStatus: 'in_progress',
-    isDemo: true
+    isDemo: false
   },
   {
-    uid: 'demo_priya_mehta',
+    uid: 'learner_priya_mehta',
     name: 'Priya Mehta',
-    email: 'priya.mehta@example.com',
+    email: 'priya.mehta@workshop.analytics.edu',
     photoURL: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
     role: 'learner',
     phone: '+91 98111 22334',
@@ -44,19 +44,19 @@ export const DEMO_LEARNERS: UserProfile[] = [
     experienceLevel: '1 Year Experience (Operations Executive)',
     careerGoal: 'Business Analyst / Strategic Planning Specialist',
     city: 'Mumbai',
-    linkedin: 'https://linkedin.com/in/priya-mehta-demo',
+    linkedin: 'https://linkedin.com/in/priya-mehta-analytics',
     github: 'https://github.com/priyamehta-data',
     createdAt: '2026-03-01T09:00:00Z',
     lastLoginAt: '2026-03-18T14:20:00Z',
     overallProgress: 92,
     jobReadinessScore: 91,
     certificateStatus: 'eligible',
-    isDemo: true
+    isDemo: false
   },
   {
-    uid: 'demo_rahul_verma',
+    uid: 'learner_rahul_verma',
     name: 'Rahul Verma',
-    email: 'rahul.verma@example.com',
+    email: 'rahul.verma@workshop.analytics.edu',
     photoURL: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     role: 'learner',
     phone: '+91 97000 88990',
@@ -73,12 +73,12 @@ export const DEMO_LEARNERS: UserProfile[] = [
     overallProgress: 60,
     jobReadinessScore: 72,
     certificateStatus: 'in_progress',
-    isDemo: true
+    isDemo: false
   },
   {
-    uid: 'demo_ananya_singh',
+    uid: 'learner_ananya_singh',
     name: 'Ananya Singh',
-    email: 'ananya.singh@example.com',
+    email: 'ananya.singh@workshop.analytics.edu',
     photoURL: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
     role: 'learner',
     phone: '+91 99887 76655',
@@ -96,7 +96,7 @@ export const DEMO_LEARNERS: UserProfile[] = [
     jobReadinessScore: 96,
     certificateStatus: 'issued',
     certificateId: 'SY-DA-2026-0001',
-    isDemo: true
+    isDemo: false
   }
 ];
 
@@ -316,23 +316,23 @@ export const INITIAL_SETTINGS: PortalSettings = {
 
 export const INITIAL_ATTENDANCE: AttendanceRecord[] = [
   // Aarav Sharma attendance
-  { id: 'att-1-1', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 1, status: 'present', markedAt: '2026-03-01' },
-  { id: 'att-1-2', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 2, status: 'present', markedAt: '2026-03-02' },
-  { id: 'att-1-3', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 3, status: 'present', markedAt: '2026-03-03' },
-  { id: 'att-1-4', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 4, status: 'late', markedAt: '2026-03-04' },
-  { id: 'att-1-5', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 5, status: 'present', markedAt: '2026-03-05' },
-  { id: 'att-1-6', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 6, status: 'present', markedAt: '2026-03-06' },
-  { id: 'att-1-7', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 7, status: 'present', markedAt: '2026-03-07' },
-  { id: 'att-1-8', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 8, status: 'present', markedAt: '2026-03-08' },
-  { id: 'att-1-9', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 9, status: 'absent', markedAt: '2026-03-09' },
-  { id: 'att-1-10', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 10, status: 'present', markedAt: '2026-03-10' },
-  { id: 'att-1-11', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 11, status: 'present', markedAt: '2026-03-11' },
-  { id: 'att-1-12', learnerId: 'demo_aarav_sharma', learnerName: 'Aarav Sharma', day: 12, status: 'present', markedAt: '2026-03-12' },
+  { id: 'att-1-1', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 1, status: 'present', markedAt: '2026-03-01' },
+  { id: 'att-1-2', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 2, status: 'present', markedAt: '2026-03-02' },
+  { id: 'att-1-3', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 3, status: 'present', markedAt: '2026-03-03' },
+  { id: 'att-1-4', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 4, status: 'late', markedAt: '2026-03-04' },
+  { id: 'att-1-5', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 5, status: 'present', markedAt: '2026-03-05' },
+  { id: 'att-1-6', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 6, status: 'present', markedAt: '2026-03-06' },
+  { id: 'att-1-7', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 7, status: 'present', markedAt: '2026-03-07' },
+  { id: 'att-1-8', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 8, status: 'present', markedAt: '2026-03-08' },
+  { id: 'att-1-9', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 9, status: 'absent', markedAt: '2026-03-09' },
+  { id: 'att-1-10', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 10, status: 'present', markedAt: '2026-03-10' },
+  { id: 'att-1-11', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 11, status: 'present', markedAt: '2026-03-11' },
+  { id: 'att-1-12', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 12, status: 'present', markedAt: '2026-03-12' },
 
   // Priya Mehta attendance (100% present)
   ...Array.from({ length: 12 }, (_, i) => ({
     id: `att-2-${i + 1}`,
-    learnerId: 'demo_priya_mehta',
+    learnerId: 'learner_priya_mehta',
     learnerName: 'Priya Mehta',
     day: i + 1,
     status: 'present' as const,
@@ -342,7 +342,7 @@ export const INITIAL_ATTENDANCE: AttendanceRecord[] = [
   // Ananya Singh attendance (100% present)
   ...Array.from({ length: 12 }, (_, i) => ({
     id: `att-4-${i + 1}`,
-    learnerId: 'demo_ananya_singh',
+    learnerId: 'learner_ananya_singh',
     learnerName: 'Ananya Singh',
     day: i + 1,
     status: 'present' as const,
@@ -354,7 +354,7 @@ export const INITIAL_SUBMISSIONS: AssignmentSubmission[] = [
   {
     id: 'sub-aarav-1',
     assignmentId: 'assign-1',
-    learnerId: 'demo_aarav_sharma',
+    learnerId: 'learner_aarav_sharma',
     learnerName: 'Aarav Sharma',
     day: 1,
     submissionType: 'text',
@@ -368,7 +368,7 @@ export const INITIAL_SUBMISSIONS: AssignmentSubmission[] = [
   {
     id: 'sub-aarav-2',
     assignmentId: 'assign-2',
-    learnerId: 'demo_aarav_sharma',
+    learnerId: 'learner_aarav_sharma',
     learnerName: 'Aarav Sharma',
     day: 2,
     submissionType: 'text',

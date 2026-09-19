@@ -213,3 +213,21 @@ export interface PortalSettings {
   leaderboardEnabled: boolean;
   minAttendanceForCert: number; // 80%
 }
+
+export interface DailyCheckinRecord {
+  id: string;
+  learnerId: string;
+  learnerName: string;
+  day: number;
+  date: string;
+  topicsCovered: string;
+  keyTakeaway: string;
+  hoursSpent: number;
+  confidenceRating: number; // 1 to 5
+  blockersOrDoubts?: string;
+  status: 'submitted' | 'reviewed';
+  timestamp: string;
+}
+
+export type CloudSyncStatus = 'synced' | 'syncing' | 'offline';
+
