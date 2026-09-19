@@ -17,8 +17,15 @@ import {
   AlertCircle,
   FileText,
   Send,
-  Target
+  Target,
+  Briefcase,
+  Play,
+  Terminal
 } from 'lucide-react';
+import { SimpleNotesTab } from './SimpleNotesTab';
+import { InterviewTipsTab } from './InterviewTipsTab';
+import { SolvedExamplesTab } from './SolvedExamplesTab';
+import { IntegratedIDEView } from './IntegratedIDEView';
 
 export const DailyLearningWorkspace: React.FC = () => {
   const {
@@ -32,9 +39,21 @@ export const DailyLearningWorkspace: React.FC = () => {
     setActiveView
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'concepts' | 'lab' | 'business' | 'quiz' | 'reflection'>('concepts');
+  const [activeTab, setActiveTab] = useState<
+    'concepts' | 'notes' | 'interview' | 'examples' | 'ide' | 'lab' | 'business' | 'quiz' | 'reflection'
+  >('concepts');
   const [reflectionText, setReflectionText] = useState('');
   const [reflectionSaved, setReflectionSaved] = useState(false);
+
+  // Cross-tab IDE transfer state
+  const [ideInitialCode, setIdeInitialCode] = useState<string | undefined>(undefined);
+  const [ideInitialLanguage, setIdeInitialLanguage] = useState<'sql' | 'python' | 'bash'>('sql');
+
+  const handleSendToIDE = (code: string, language: 'sql' | 'python' | 'bash') => {
+    setIdeInitialCode(code);
+    setIdeInitialLanguage(language);
+    setActiveTab('ide');
+  };
 
   // Quiz interactive state
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
@@ -166,12 +185,12 @@ export const DailyLearningWorkspace: React.FC = () => {
       </div>
 
       {/* Interactive Tabs */}
-      <div className="flex border-b border-slate-800 text-xs sm:text-sm font-semibold gap-1 sm:gap-2 overflow-x-auto">
+      <div className="flex border-b border-slate-800 text-xs sm:text-sm font-semibold gap-1 sm:gap-2 overflow-x-auto pb-0.5">
         <button
           onClick={() => setActiveTab('concepts')}
-          className={`px-4 py-3 border-b-2 transition flex items-center gap-2 cursor-pointer ${
+          className={`px-3.5 py-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
             activeTab === 'concepts'
-              ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10'
+              ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10 font-bold'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -180,10 +199,58 @@ export const DailyLearningWorkspace: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setActiveTab('notes')}
+          className={`px-3.5 py-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            activeTab === 'notes'
+              ? 'border-amber-500 text-amber-300 bg-amber-500/10 font-bold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <FileText className="w-4 h-4 text-amber-400" />
+          <span>Simple Notes</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('interview')}
+          className={`px-3.5 py-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            activeTab === 'interview'
+              ? 'border-emerald-500 text-emerald-300 bg-emerald-500/10 font-bold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Briefcase className="w-4 h-4 text-emerald-400" />
+          <span>Interview Tips & Tricks</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('examples')}
+          className={`px-3.5 py-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            activeTab === 'examples'
+              ? 'border-blue-500 text-blue-300 bg-blue-500/10 font-bold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <CheckCircle2 className="w-4 h-4 text-blue-400" />
+          <span>5 Solved Examples</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('ide')}
+          className={`px-3.5 py-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            activeTab === 'ide'
+              ? 'border-purple-500 text-purple-300 bg-purple-500/10 font-bold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Terminal className="w-4 h-4 text-purple-400" />
+          <span>Integrated IDE</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('lab')}
-          className={`px-4 py-3 border-b-2 transition flex items-center gap-2 cursor-pointer ${
+          className={`px-3.5 py-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
             activeTab === 'lab'
-              ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10'
+              ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10 font-bold'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -193,9 +260,9 @@ export const DailyLearningWorkspace: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('business')}
-          className={`px-4 py-3 border-b-2 transition flex items-center gap-2 cursor-pointer ${
+          className={`px-3.5 py-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
             activeTab === 'business'
-              ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10'
+              ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10 font-bold'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -205,28 +272,55 @@ export const DailyLearningWorkspace: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('quiz')}
-          className={`px-4 py-3 border-b-2 transition flex items-center gap-2 cursor-pointer ${
+          className={`px-3.5 py-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
             activeTab === 'quiz'
-              ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10'
+              ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10 font-bold'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
           <HelpCircle className="w-4 h-4" />
-          <span>Daily Assessment</span>
+          <span>Assessment</span>
         </button>
 
         <button
           onClick={() => setActiveTab('reflection')}
-          className={`px-4 py-3 border-b-2 transition flex items-center gap-2 cursor-pointer ${
+          className={`px-3.5 py-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
             activeTab === 'reflection'
-              ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10'
+              ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10 font-bold'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
           <MessageSquare className="w-4 h-4" />
-          <span>Reflection & Notes</span>
+          <span>Reflection</span>
         </button>
       </div>
+
+      {/* Tab: Simple Notes */}
+      {activeTab === 'notes' && (
+        <SimpleNotesTab dayNumber={dayData.day} />
+      )}
+
+      {/* Tab: Interview Tips & Tricks */}
+      {activeTab === 'interview' && (
+        <InterviewTipsTab dayNumber={dayData.day} />
+      )}
+
+      {/* Tab: 5 Solved Examples per Day */}
+      {activeTab === 'examples' && (
+        <SolvedExamplesTab 
+          dayNumber={dayData.day} 
+          onSendToIDE={handleSendToIDE}
+        />
+      )}
+
+      {/* Tab: Integrated IDE for running programs & commands */}
+      {activeTab === 'ide' && (
+        <IntegratedIDEView 
+          dayNumber={dayData.day}
+          initialCode={ideInitialCode}
+          initialLanguage={ideInitialLanguage}
+        />
+      )}
 
       {/* Tab 1: Concepts & Code */}
       {activeTab === 'concepts' && (

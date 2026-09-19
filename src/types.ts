@@ -231,3 +231,100 @@ export interface DailyCheckinRecord {
 
 export type CloudSyncStatus = 'synced' | 'syncing' | 'offline';
 
+export interface DaySimpleNotes {
+  day: number;
+  domain: string;
+  summary: string;
+  cheatSheet: {
+    category: string;
+    items: string[];
+  }[];
+  keyFormulasAndSyntax: {
+    name: string;
+    syntax: string;
+    usage: string;
+  }[];
+  commonMistakes: string[];
+  proTips: string[];
+}
+
+export interface InterviewTipItem {
+  id: string;
+  question: string;
+  category: 'Technical' | 'Business Scenario' | 'System & Logic' | 'Behavioral' | 'Design & Visual';
+  difficulty: 'Junior' | 'Mid-Level' | 'Senior/Lead';
+  interviewerMindset: string;
+  answeringFramework: string;
+  modelAnswer: string;
+  codeSnippet?: string;
+  trapsToAvoid: string[];
+}
+
+export interface DayInterviewGuide {
+  day: number;
+  domain: string;
+  coreMindset: string;
+  generalTips: string[];
+  keyQuestions: InterviewTipItem[];
+}
+
+export interface SolvedExample {
+  id: string;
+  day: number;
+  exampleNumber: number; // 1 to 5
+  title: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  businessContext: string;
+  problemStatement: string;
+  inputDatasetSchema?: {
+    tableName: string;
+    columns: string[];
+    sampleRows: Record<string, any>[];
+  };
+  language: 'sql' | 'python' | 'excel' | 'powerbi' | 'bash';
+  solutionCode: string;
+  stepByStepExplanation: string[];
+  expectedOutputPreview?: {
+    columns: string[];
+    rows: (string | number | boolean)[][];
+    summaryText?: string;
+  };
+  interviewRelevance: string;
+}
+
+export interface IDEExecutionResult {
+  status: 'success' | 'error';
+  executionTimeMs: number;
+  rowsAffected?: number;
+  data?: {
+    columns: string[];
+    rows: Record<string, any>[];
+  };
+  logs?: string[];
+  errorMessage?: string;
+  success?: boolean;
+  type?: 'sql' | 'python' | 'terminal' | 'bash';
+  outputRows?: Record<string, any>[];
+  columns?: string[];
+  stdout?: string;
+  stderr?: string;
+  chartData?: { label: string; value: number }[];
+}
+
+export interface IDESampleSnippet {
+  id: string;
+  title: string;
+  name?: string;
+  language: 'sql' | 'python' | 'terminal' | 'bash';
+  day?: number;
+  code: string;
+  description?: string;
+}
+
+export interface UserDayNote {
+  day: number;
+  userId: string;
+  content: string;
+  lastUpdated: string;
+}
+
