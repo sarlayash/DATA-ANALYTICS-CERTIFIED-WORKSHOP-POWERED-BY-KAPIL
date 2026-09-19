@@ -29,11 +29,27 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
       - name: Install dependencies
         run: npm install
 
       - name: Build Vite application
         run: npm run build
+
+      - name: Verify production files
+        shell: bash
+        run: |
+          test -f dist/index.html
+          test -d dist/assets
+          echo "=== dist/index.html ==="
+          sed -n '1,80p' dist/index.html
+          echo "=== dist/assets ==="
+          find dist/assets -maxdepth 1 -type f -print
+
+      - name: Disable Jekyll processing
+        run: touch dist/.nojekyll
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
