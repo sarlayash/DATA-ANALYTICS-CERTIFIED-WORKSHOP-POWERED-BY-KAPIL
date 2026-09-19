@@ -4,9 +4,9 @@ import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
-  // Required for GitHub Pages project sites.
-  // Repository: sarlayash/DATA-ANALYTICS-CERTIFIED-WORKSHOP-POWERED-BY-KAPIL
-  base: '/DATA-ANALYTICS-CERTIFIED-WORKSHOP-POWERED-BY-KAPIL/',
+  // Use relative asset URLs so the Vite build works reliably on the
+  // GitHub Pages project URL as well as local hosting.
+  base: './',
 
   plugins: [react(), tailwindcss()],
 
