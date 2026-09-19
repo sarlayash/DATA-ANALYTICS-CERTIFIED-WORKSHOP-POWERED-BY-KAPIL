@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == "kapilnarula27july@gmail.com" ||
+        request.auth.token.role == "admin" ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'jobReadinessScore'])) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Modules Collection (Course curriculum)
+    match /modules/{moduleId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Assignments Collection
+    match /assignments/{assignmentId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Submissions Collection
+    match /submissions/{submissionId} {
+      allow get: if isSignedIn() && (resource.data.learnerId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.learnerId == request.auth.uid;
+      allow update: if (isSignedIn() && resource.data.learnerId == request.auth.uid && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['marks', 'feedback', 'status'])) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Attendance Collection
+    match /attendance/{attendanceId} {
+      allow get: if isSignedIn() && (resource.data.learnerId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Certificates Collection
+    match /certificates/{certificateId} {
+      // Public verification can read valid certificate records
+      allow get: if true;
+      allow list: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Announcements Collection
+    match /announcements/{announcementId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Settings Collection
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

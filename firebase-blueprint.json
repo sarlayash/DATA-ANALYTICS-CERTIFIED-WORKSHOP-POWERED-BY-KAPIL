@@ -1,0 +1,167 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Learner and Admin profile documents",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["learner", "admin"] },
+        "phone": { "type": "string" },
+        "college": { "type": "string" },
+        "course": { "type": "string" },
+        "graduationYear": { "type": "string" },
+        "experienceLevel": { "type": "string" },
+        "careerGoal": { "type": "string" },
+        "city": { "type": "string" },
+        "linkedin": { "type": "string" },
+        "github": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "lastLoginAt": { "type": "string" },
+        "overallProgress": { "type": "number" },
+        "jobReadinessScore": { "type": "number" },
+        "certificateStatus": { "type": "string", "enum": ["not_started", "in_progress", "eligible", "issued"] },
+        "isDemo": { "type": "boolean" }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "Module": {
+      "title": "Module",
+      "description": "Daily curriculum syllabus for 12 days",
+      "type": "object",
+      "properties": {
+        "day": { "type": "number" },
+        "title": { "type": "string" },
+        "domain": { "type": "string" },
+        "learningObjective": { "type": "string" },
+        "agenda": { "type": "string" },
+        "concepts": { "type": "string" },
+        "handsOnLab": { "type": "string" },
+        "businessProblem": { "type": "string" },
+        "challenge": { "type": "string" },
+        "resources": { "type": "string" },
+        "expectedOutcomes": { "type": "string" },
+        "skillsTested": { "type": "string" }
+      },
+      "required": ["day", "title", "domain"]
+    },
+    "Assignment": {
+      "title": "Assignment",
+      "description": "Daily practical assignments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "day": { "type": "number" },
+        "title": { "type": "string" },
+        "module": { "type": "string" },
+        "description": { "type": "string" },
+        "instructions": { "type": "string" },
+        "deadline": { "type": "string" },
+        "maxMarks": { "type": "number" },
+        "submissionType": { "type": "string" },
+        "skillsTested": { "type": "string" }
+      },
+      "required": ["id", "day", "title", "maxMarks"]
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "Learner submitted work for assignments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "assignmentId": { "type": "string" },
+        "learnerId": { "type": "string" },
+        "learnerName": { "type": "string" },
+        "day": { "type": "number" },
+        "submissionType": { "type": "string" },
+        "content": { "type": "string" },
+        "url": { "type": "string" },
+        "status": { "type": "string", "enum": ["submitted", "pending", "evaluated"] },
+        "marks": { "type": "number" },
+        "feedback": { "type": "string" },
+        "submittedAt": { "type": "string" },
+        "evaluatedAt": { "type": "string" }
+      },
+      "required": ["id", "assignmentId", "learnerId", "status"]
+    },
+    "AttendanceRecord": {
+      "title": "AttendanceRecord",
+      "description": "Daily attendance for a learner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "learnerId": { "type": "string" },
+        "day": { "type": "number" },
+        "status": { "type": "string", "enum": ["present", "absent", "late"] },
+        "markedAt": { "type": "string" }
+      },
+      "required": ["id", "learnerId", "day", "status"]
+    },
+    "Certificate": {
+      "title": "Certificate",
+      "description": "Issued official certificate of completion",
+      "type": "object",
+      "properties": {
+        "certificateId": { "type": "string" },
+        "learnerId": { "type": "string" },
+        "learnerName": { "type": "string" },
+        "courseName": { "type": "string" },
+        "duration": { "type": "string" },
+        "completionDate": { "type": "string" },
+        "verificationUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["VALID", "REVOKED"] },
+        "issuedBy": { "type": "string" },
+        "issuedAt": { "type": "string" }
+      },
+      "required": ["certificateId", "learnerId", "learnerName", "status"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Workshop announcements from admin",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "category": { "type": "string" },
+        "authorName": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "pinned": { "type": "boolean" }
+      },
+      "required": ["id", "title", "content", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores user profiles with role-based access"
+    },
+    "/modules/{moduleId}": {
+      "schema": "Module",
+      "description": "12-day workshop curriculum content"
+    },
+    "/assignments/{assignmentId}": {
+      "schema": "Assignment",
+      "description": "Workshop assignments created by instructor"
+    },
+    "/submissions/{submissionId}": {
+      "schema": "Submission",
+      "description": "Learner submissions and grades"
+    },
+    "/attendance/{attendanceId}": {
+      "schema": "AttendanceRecord",
+      "description": "Daily attendance records per learner"
+    },
+    "/certificates/{certificateId}": {
+      "schema": "Certificate",
+      "description": "Verified certificates issued to graduates"
+    },
+    "/announcements/{announcementId}": {
+      "schema": "Announcement",
+      "description": "Program announcements"
+    }
+  }
+}
