@@ -27,6 +27,7 @@ export const LearnerDashboard: React.FC = () => {
     curriculum,
     assignments,
     submissions,
+    quizResults,
     skills,
     calculateAttendancePercent,
     calculateOverallProgress,
@@ -50,8 +51,11 @@ export const LearnerDashboard: React.FC = () => {
   const learnerSubs = submissions.filter(s => s.learnerId === currentLearnerId);
   const assignmentRate = Math.min(100, Math.round((learnerSubs.length / 12) * 100));
 
-  // Average assessment score
-  const avgAssessmentScore = 88; // standard cohort weighted baseline
+  // Average assessment score computed from real user quizzes
+  const userQuizzes = quizResults ? quizResults.filter(q => q.learnerId === currentLearnerId) : [];
+  const avgAssessmentScore = userQuizzes.length > 0
+    ? Math.round(userQuizzes.reduce((acc, q) => acc + (q.score / (q.maxScore || 1)) * 100, 0) / userQuizzes.length)
+    : 0;
 
   // Skills acquired count (proficient or job ready)
   const skillsAcquired = skills.filter(s => s.level === 'Proficient' || s.level === 'Job Ready').length;

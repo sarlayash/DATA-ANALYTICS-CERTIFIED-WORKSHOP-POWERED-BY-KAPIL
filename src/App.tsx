@@ -6,7 +6,6 @@ import { LandingPage } from './components/LandingPage';
 import { ProfileSetupModal } from './components/ProfileSetupModal';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { AIAssistantDrawer } from './components/AIAssistantDrawer';
-import { FirebaseSetupGuideModal } from './components/FirebaseSetupGuideModal';
 
 import { LearnerDashboard } from './components/LearnerDashboard';
 import { DailyLearningWorkspace } from './components/DailyLearningWorkspace';
@@ -41,7 +40,6 @@ const MainAppContent: React.FC = () => {
         <LandingPage />
         <ProfileSetupModal />
         <AdminLoginModal />
-        <FirebaseSetupGuideModal />
       </div>
     );
   }
@@ -106,7 +104,6 @@ const MainAppContent: React.FC = () => {
       <ProfileSetupModal />
       <AdminLoginModal />
       <AIAssistantDrawer />
-      <FirebaseSetupGuideModal />
     </div>
   );
 };

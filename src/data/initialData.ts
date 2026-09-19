@@ -8,117 +8,27 @@ import {
   AssignmentSubmission
 } from '../types';
 
-export const DEMO_LEARNERS: UserProfile[] = [
-  {
-    uid: 'learner_aarav_sharma',
-    name: 'Aarav Sharma',
-    email: 'aarav.sharma@workshop.analytics.edu',
-    photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    role: 'learner',
-    phone: '+91 98765 43210',
-    college: 'Delhi Technological University',
-    course: 'B.Tech Computer Science',
-    graduationYear: '2025',
-    experienceLevel: 'Final Year Student / Entry-Level',
-    careerGoal: 'Associate Data Analyst / BI Analyst at Tier-1 Tech Firm',
-    city: 'New Delhi',
-    linkedin: 'https://linkedin.com/in/aarav-sharma-analytics',
-    github: 'https://github.com/aarav-analytics',
-    createdAt: '2026-03-01T09:00:00Z',
-    lastLoginAt: '2026-03-19T06:30:00Z',
-    overallProgress: 75,
-    jobReadinessScore: 84,
-    certificateStatus: 'in_progress',
-    isDemo: false
-  },
-  {
-    uid: 'learner_priya_mehta',
-    name: 'Priya Mehta',
-    email: 'priya.mehta@workshop.analytics.edu',
-    photoURL: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-    role: 'learner',
-    phone: '+91 98111 22334',
-    college: 'Symbiosis Institute of Business Management',
-    course: 'MBA Marketing & Operations',
-    graduationYear: '2024',
-    experienceLevel: '1 Year Experience (Operations Executive)',
-    careerGoal: 'Business Analyst / Strategic Planning Specialist',
-    city: 'Mumbai',
-    linkedin: 'https://linkedin.com/in/priya-mehta-analytics',
-    github: 'https://github.com/priyamehta-data',
-    createdAt: '2026-03-01T09:00:00Z',
-    lastLoginAt: '2026-03-18T14:20:00Z',
-    overallProgress: 92,
-    jobReadinessScore: 91,
-    certificateStatus: 'eligible',
-    isDemo: false
-  },
-  {
-    uid: 'learner_rahul_verma',
-    name: 'Rahul Verma',
-    email: 'rahul.verma@workshop.analytics.edu',
-    photoURL: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    role: 'learner',
-    phone: '+91 97000 88990',
-    college: 'Vellore Institute of Technology',
-    course: 'B.Sc Statistics & Data Analytics',
-    graduationYear: '2026',
-    experienceLevel: '3rd Year College Undergraduate',
-    careerGoal: 'Junior Data Scientist / Risk Analyst',
-    city: 'Bengaluru',
-    linkedin: 'https://linkedin.com/in/rahul-verma-stats',
-    github: 'https://github.com/rahulv-stats',
-    createdAt: '2026-03-02T10:00:00Z',
-    lastLoginAt: '2026-03-19T05:15:00Z',
-    overallProgress: 60,
-    jobReadinessScore: 72,
-    certificateStatus: 'in_progress',
-    isDemo: false
-  },
-  {
-    uid: 'learner_ananya_singh',
-    name: 'Ananya Singh',
-    email: 'ananya.singh@workshop.analytics.edu',
-    photoURL: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
-    role: 'learner',
-    phone: '+91 99887 76655',
-    college: 'BITS Pilani',
-    course: 'B.E. Mechanical Engineering',
-    graduationYear: '2024',
-    experienceLevel: 'Career Switcher (Mechanical to Tech Analytics)',
-    careerGoal: 'Supply Chain & Commercial BI Analyst',
-    city: 'Hyderabad',
-    linkedin: 'https://linkedin.com/in/ananya-singh-switch',
-    github: 'https://github.com/ananya-bi-portfolio',
-    createdAt: '2026-03-01T09:00:00Z',
-    lastLoginAt: '2026-03-19T07:05:00Z',
-    overallProgress: 100,
-    jobReadinessScore: 96,
-    certificateStatus: 'issued',
-    certificateId: 'SY-DA-2026-0001',
-    isDemo: false
-  }
-];
+export const DEMO_LEARNERS: UserProfile[] = [];
 
 export const INITIAL_SKILLS: SkillItem[] = [
-  { id: 's-sql', name: 'SQL', domain: 'SQL & BigQuery', description: 'Multi-table queries, subqueries, complex aggregations and joins', level: 'Proficient', industryImportance: 'Critical' },
-  { id: 's-bigquery', name: 'BigQuery', domain: 'SQL & BigQuery', description: 'Cloud data warehouse queries, partitioning, clustering, cost control', level: 'Practicing', industryImportance: 'Critical' },
-  { id: 's-python', name: 'Python', domain: 'Python for Data Analytics', description: 'Data structures, custom functions, automation pipelines, and scripting', level: 'Proficient', industryImportance: 'Critical' },
-  { id: 's-pandas', name: 'Pandas', domain: 'Python for Data Analytics', description: 'DataFrames, method chaining, groupbys, and tabular transforms', level: 'Job Ready', industryImportance: 'Critical' },
-  { id: 's-numpy', name: 'NumPy', domain: 'Python for Data Analytics', description: 'Vectorized math, ndarrays, broadcasting, numerical analysis', level: 'Proficient', industryImportance: 'High' },
-  { id: 's-cleaning', name: 'Data Cleaning', domain: 'Data Preparation', description: 'Anomaly detection, missing value strategies, deduplication, regex', level: 'Job Ready', industryImportance: 'Critical' },
-  { id: 's-eda', name: 'EDA', domain: 'Exploratory Analysis', description: 'Hypothesis generation, distributions, correlations, outliers', level: 'Proficient', industryImportance: 'Critical' },
-  { id: 's-excel', name: 'Excel', domain: 'MS Excel for Analytics', description: 'Advanced dynamic arrays, XLOOKUP, conditional formulas', level: 'Job Ready', industryImportance: 'Critical' },
-  { id: 's-pivots', name: 'Pivot Tables', domain: 'MS Excel for Analytics', description: 'Multi-dimensional slicing, calculated fields, dynamic timelines', level: 'Job Ready', industryImportance: 'Critical' },
-  { id: 's-powerquery', name: 'Power Query', domain: 'MS Excel & BI', description: 'Automated ETL, unpivoting, folder merging, M language logic', level: 'Practicing', industryImportance: 'High' },
-  { id: 's-ppt', name: 'PowerPoint', domain: 'Business Reporting', description: 'Minto Pyramid storytelling, board decks, action titles, C-suite memos', level: 'Proficient', industryImportance: 'High' },
-  { id: 's-powerbi', name: 'Power BI', domain: 'Power BI', description: 'End-to-end report modeling, Star Schema, drill-through, bookmarks', level: 'Practicing', industryImportance: 'Critical' },
-  { id: 's-dax', name: 'DAX', domain: 'Power BI', description: 'CALCULATE filter context modifications, time intelligence measures', level: 'Practicing', industryImportance: 'Critical' },
-  { id: 's-dataviz', name: 'Data Visualization', domain: 'Visualization Best Practices', description: 'Preattentive attributes, Gestalt layout, accessible color palettes', level: 'Proficient', industryImportance: 'High' },
-  { id: 's-dashboards', name: 'Dashboard Design', domain: 'Visualization Best Practices', description: 'Executive F-pattern layout, 5-second clarity test, low cognitive load', level: 'Proficient', industryImportance: 'Critical' },
-  { id: 's-storytelling', name: 'Business Storytelling', domain: 'Executive Communication', description: 'Translating data into commercial profit/loss and operational decisions', level: 'Job Ready', industryImportance: 'Critical' },
-  { id: 's-genai', name: 'GenAI', domain: 'GenAI for Analysts', description: 'Prompt patterns, automated analysis generation, LLM data workflows', level: 'Proficient', industryImportance: 'High' },
-  { id: 's-prompteng', name: 'Prompt Engineering', domain: 'GenAI for Analysts', description: 'Few-shot prompting, grounded schemas, code debug instructions', level: 'Proficient', industryImportance: 'High' }
+  { id: 's-sql', name: 'SQL', domain: 'SQL & BigQuery', description: 'Multi-table queries, subqueries, complex aggregations and joins', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-bigquery', name: 'BigQuery', domain: 'SQL & BigQuery', description: 'Cloud data warehouse queries, partitioning, clustering, cost control', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-python', name: 'Python', domain: 'Python for Data Analytics', description: 'Data structures, custom functions, automation pipelines, and scripting', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-pandas', name: 'Pandas', domain: 'Python for Data Analytics', description: 'DataFrames, method chaining, groupbys, and tabular transforms', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-numpy', name: 'NumPy', domain: 'Python for Data Analytics', description: 'Vectorized math, ndarrays, broadcasting, numerical analysis', level: 'Not Started', industryImportance: 'High' },
+  { id: 's-cleaning', name: 'Data Cleaning', domain: 'Data Preparation', description: 'Anomaly detection, missing value strategies, deduplication, regex', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-eda', name: 'EDA', domain: 'Exploratory Analysis', description: 'Hypothesis generation, distributions, correlations, outliers', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-excel', name: 'Excel', domain: 'MS Excel for Analytics', description: 'Advanced dynamic arrays, XLOOKUP, conditional formulas', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-pivots', name: 'Pivot Tables', domain: 'MS Excel for Analytics', description: 'Multi-dimensional slicing, calculated fields, dynamic timelines', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-powerquery', name: 'Power Query', domain: 'MS Excel & BI', description: 'Automated ETL, unpivoting, folder merging, M language logic', level: 'Not Started', industryImportance: 'High' },
+  { id: 's-ppt', name: 'PowerPoint', domain: 'Business Reporting', description: 'Minto Pyramid storytelling, board decks, action titles, C-suite memos', level: 'Not Started', industryImportance: 'High' },
+  { id: 's-powerbi', name: 'Power BI', domain: 'Power BI', description: 'End-to-end report modeling, Star Schema, drill-through, bookmarks', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-dax', name: 'DAX', domain: 'Power BI', description: 'CALCULATE filter context modifications, time intelligence measures', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-dataviz', name: 'Data Visualization', domain: 'Visualization Best Practices', description: 'Preattentive attributes, Gestalt layout, accessible color palettes', level: 'Not Started', industryImportance: 'High' },
+  { id: 's-dashboards', name: 'Dashboard Design', domain: 'Visualization Best Practices', description: 'Executive F-pattern layout, 5-second clarity test, low cognitive load', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-storytelling', name: 'Business Storytelling', domain: 'Executive Communication', description: 'Translating data into commercial profit/loss and operational decisions', level: 'Not Started', industryImportance: 'Critical' },
+  { id: 's-genai', name: 'GenAI', domain: 'GenAI for Analysts', description: 'Prompt patterns, automated analysis generation, LLM data workflows', level: 'Not Started', industryImportance: 'High' },
+  { id: 's-prompteng', name: 'Prompt Engineering', domain: 'GenAI for Analysts', description: 'Few-shot prompting, grounded schemas, code debug instructions', level: 'Not Started', industryImportance: 'High' }
 ];
 
 export const INITIAL_ASSIGNMENTS: Assignment[] = [
@@ -314,72 +224,9 @@ export const INITIAL_SETTINGS: PortalSettings = {
   }
 };
 
-export const INITIAL_ATTENDANCE: AttendanceRecord[] = [
-  // Aarav Sharma attendance
-  { id: 'att-1-1', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 1, status: 'present', markedAt: '2026-03-01' },
-  { id: 'att-1-2', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 2, status: 'present', markedAt: '2026-03-02' },
-  { id: 'att-1-3', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 3, status: 'present', markedAt: '2026-03-03' },
-  { id: 'att-1-4', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 4, status: 'late', markedAt: '2026-03-04' },
-  { id: 'att-1-5', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 5, status: 'present', markedAt: '2026-03-05' },
-  { id: 'att-1-6', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 6, status: 'present', markedAt: '2026-03-06' },
-  { id: 'att-1-7', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 7, status: 'present', markedAt: '2026-03-07' },
-  { id: 'att-1-8', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 8, status: 'present', markedAt: '2026-03-08' },
-  { id: 'att-1-9', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 9, status: 'absent', markedAt: '2026-03-09' },
-  { id: 'att-1-10', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 10, status: 'present', markedAt: '2026-03-10' },
-  { id: 'att-1-11', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 11, status: 'present', markedAt: '2026-03-11' },
-  { id: 'att-1-12', learnerId: 'learner_aarav_sharma', learnerName: 'Aarav Sharma', day: 12, status: 'present', markedAt: '2026-03-12' },
+export const INITIAL_ATTENDANCE: AttendanceRecord[] = [];
 
-  // Priya Mehta attendance (100% present)
-  ...Array.from({ length: 12 }, (_, i) => ({
-    id: `att-2-${i + 1}`,
-    learnerId: 'learner_priya_mehta',
-    learnerName: 'Priya Mehta',
-    day: i + 1,
-    status: 'present' as const,
-    markedAt: `2026-03-${String(i + 1).padStart(2, '0')}`
-  })),
-
-  // Ananya Singh attendance (100% present)
-  ...Array.from({ length: 12 }, (_, i) => ({
-    id: `att-4-${i + 1}`,
-    learnerId: 'learner_ananya_singh',
-    learnerName: 'Ananya Singh',
-    day: i + 1,
-    status: 'present' as const,
-    markedAt: `2026-03-${String(i + 1).padStart(2, '0')}`
-  }))
-];
-
-export const INITIAL_SUBMISSIONS: AssignmentSubmission[] = [
-  {
-    id: 'sub-aarav-1',
-    assignmentId: 'assign-1',
-    learnerId: 'learner_aarav_sharma',
-    learnerName: 'Aarav Sharma',
-    day: 1,
-    submissionType: 'text',
-    content: 'Deconstructed churn into 3 branches: 1) Onboarding friction in first 7 days, 2) Price elasticity after discount expiration, 3) Product catalog outages in tier-2 cities. Formulated A/B test hypothesis for onboarding checklist.',
-    status: 'evaluated',
-    marks: 92,
-    feedback: 'Excellent MECE decomposition. The connection to A/B testing demonstrates mature business acumen.',
-    submittedAt: '2026-03-01T21:45:00Z',
-    evaluatedAt: '2026-03-02T10:15:00Z'
-  },
-  {
-    id: 'sub-aarav-2',
-    assignmentId: 'assign-2',
-    learnerId: 'learner_aarav_sharma',
-    learnerName: 'Aarav Sharma',
-    day: 2,
-    submissionType: 'text',
-    content: 'SELECT c.region, COUNT(DISTINCT o.order_id) as total_orders, SUM(o.amount) as gmv FROM customers c LEFT JOIN orders o ON c.customer_id = o.customer_id WHERE o.status != "CANCELLED" GROUP BY 1 ORDER BY 3 DESC;',
-    status: 'evaluated',
-    marks: 88,
-    feedback: 'Good join syntax and DISTINCT protection. Consider adding NULL handling with COALESCE for regions with zero orders.',
-    submittedAt: '2026-03-02T22:10:00Z',
-    evaluatedAt: '2026-03-03T11:00:00Z'
-  }
-];
+export const INITIAL_SUBMISSIONS: AssignmentSubmission[] = [];
 
 export const INTERVIEW_QUESTIONS = {
   sql: [

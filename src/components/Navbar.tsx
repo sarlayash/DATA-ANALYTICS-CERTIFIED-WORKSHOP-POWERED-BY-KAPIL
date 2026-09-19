@@ -21,7 +21,6 @@ export const Navbar: React.FC = () => {
     logout,
     loginWithGoogle,
     setIsAdminLoginOpen,
-    setIsFirebaseSetupOpen,
     setIsAiDrawerOpen,
     activeView,
     setActiveView,
@@ -70,16 +69,6 @@ export const Navbar: React.FC = () => {
           >
             <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
             <span className="hidden md:inline">AI Coach</span>
-          </button>
-
-          {/* Firebase Guide Button */}
-          <button
-            onClick={() => setIsFirebaseSetupOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-750 border border-slate-700 transition cursor-pointer"
-            title="Firebase Architecture & Setup Guide"
-          >
-            <Database className="w-3.5 h-3.5 text-amber-400" />
-            <span>Firebase Guide</span>
           </button>
 
           {currentUser ? (
@@ -188,7 +177,7 @@ export const Navbar: React.FC = () => {
                           className="w-full text-left px-3 py-2 text-xs text-amber-300 hover:bg-slate-700 rounded-lg flex items-center gap-2 font-medium"
                         >
                           <ShieldCheck className="w-4 h-4" />
-                          <span>Admin Login (kapiladmin)</span>
+                          <span>Admin Portal</span>
                         </button>
                       )}
                       <button

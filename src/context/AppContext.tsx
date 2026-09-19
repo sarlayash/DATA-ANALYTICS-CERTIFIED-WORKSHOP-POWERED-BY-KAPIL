@@ -52,7 +52,6 @@ interface AppContextType {
   selectedDay: number;
   isProfileSetupOpen: boolean;
   isAdminLoginOpen: boolean;
-  isFirebaseSetupOpen: boolean;
   isAiDrawerOpen: boolean;
   currentVerifyingCertId: string | null;
 
@@ -67,7 +66,6 @@ interface AppContextType {
   setSelectedDay: (day: number) => void;
   setIsProfileSetupOpen: (open: boolean) => void;
   setIsAdminLoginOpen: (open: boolean) => void;
-  setIsFirebaseSetupOpen: (open: boolean) => void;
   setIsAiDrawerOpen: (open: boolean) => void;
   setCurrentVerifyingCertId: (id: string | null) => void;
 
@@ -80,6 +78,7 @@ interface AppContextType {
   // Learner Actions
   markDayComplete: (day: number) => void;
   completedDays: number[];
+  quizResults: { learnerId: string; day: number; score: number; maxScore: number }[];
   submitQuizResult: (day: number, score: number, maxScore: number) => void;
   submitAssignment: (assignmentId: string, type: string, content: string, url?: string) => void;
   submitCapstone: (capstoneData: Partial<CapstoneSubmission>) => void;
@@ -127,35 +126,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     const saved = localStorage.getItem('da_current_user');
     if (saved) {
-      const user = JSON.parse(saved);
-      if (user?.uid?.startsWith('demo_')) {
-        user.uid = user.uid.replace(/^demo_/, 'learner_');
+      try {
+        const user = JSON.parse(saved);
+        if (
+          user &&
+          !user.uid?.includes('aarav') &&
+          !user.uid?.includes('priya') &&
+          !user.uid?.includes('rahul') &&
+          !user.uid?.includes('ananya') &&
+          !user.uid?.startsWith('demo_')
+        ) {
+          return user;
+        }
+      } catch (e) {
+        // ignore
       }
-      return user;
     }
-    return DEMO_LEARNERS[0]; // Start logged in with Aarav Sharma for immediate preview
+    return null; // Start with no logged-in demo user; prompt genuine enrollment or login
   });
 
   const [learners, setLearners] = useState<UserProfile[]>(() => {
     const saved = localStorage.getItem('da_learners');
     if (saved) {
-      const list: UserProfile[] = JSON.parse(saved);
-      // If list has stale demo_ IDs, migrate them
-      let migrated = false;
-      const updated = list.map(l => {
-        if (l.uid.startsWith('demo_')) {
-          migrated = true;
-          return { ...l, uid: l.uid.replace(/^demo_/, 'learner_') };
-        }
-        return l;
-      });
-      if (migrated) {
-        localStorage.setItem('da_learners', JSON.stringify(updated));
-        return updated;
+      try {
+        const list: UserProfile[] = JSON.parse(saved);
+        const filtered = list.filter(
+          l =>
+            !l.uid?.includes('aarav') &&
+            !l.uid?.includes('priya') &&
+            !l.uid?.includes('rahul') &&
+            !l.uid?.includes('ananya') &&
+            !l.uid?.startsWith('demo_')
+        );
+        return filtered;
+      } catch (e) {
+        return [];
       }
-      return list;
     }
-    return DEMO_LEARNERS;
+    return []; // Start from 0 learners
   });
 
   const [curriculum, setCurriculum] = useState<CurriculumDay[]>(CURRICULUM_DAYS);
@@ -164,43 +172,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [submissions, setSubmissions] = useState<AssignmentSubmission[]>(() => {
     const saved = localStorage.getItem('da_submissions');
     if (saved) {
-      const list: AssignmentSubmission[] = JSON.parse(saved);
-      let migrated = false;
-      const updated = list.map(s => {
-        if (s.learnerId.startsWith('demo_')) {
-          migrated = true;
-          return { ...s, learnerId: s.learnerId.replace(/^demo_/, 'learner_') };
-        }
-        return s;
-      });
-      if (migrated) {
-        localStorage.setItem('da_submissions', JSON.stringify(updated));
-        return updated;
+      try {
+        const list: AssignmentSubmission[] = JSON.parse(saved);
+        return list.filter(
+          s =>
+            !s.learnerId?.includes('aarav') &&
+            !s.learnerId?.includes('priya') &&
+            !s.learnerId?.startsWith('demo_')
+        );
+      } catch (e) {
+        return [];
       }
-      return list;
     }
-    return INITIAL_SUBMISSIONS;
+    return []; // No fake submissions
   });
 
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(() => {
     const saved = localStorage.getItem('da_attendance');
     if (saved) {
-      const list: AttendanceRecord[] = JSON.parse(saved);
-      let migrated = false;
-      const updated = list.map(a => {
-        if (a.learnerId.startsWith('demo_')) {
-          migrated = true;
-          return { ...a, learnerId: a.learnerId.replace(/^demo_/, 'learner_') };
-        }
-        return a;
-      });
-      if (migrated) {
-        localStorage.setItem('da_attendance', JSON.stringify(updated));
-        return updated;
+      try {
+        const list: AttendanceRecord[] = JSON.parse(saved);
+        return list.filter(
+          a =>
+            !a.learnerId?.includes('aarav') &&
+            !a.learnerId?.includes('priya') &&
+            !a.learnerId?.includes('ananya') &&
+            !a.learnerId?.startsWith('demo_')
+        );
+      } catch (e) {
+        return [];
       }
-      return list;
     }
-    return INITIAL_ATTENDANCE;
+    return []; // No fake attendance
   });
 
   const [skills, setSkills] = useState<SkillItem[]>(() => {
@@ -210,7 +213,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [completedDays, setCompletedDays] = useState<number[]>(() => {
     const saved = localStorage.getItem('da_completed_days');
-    return saved ? JSON.parse(saved) : [1, 2, 3, 4, 5, 6, 7];
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Clear legacy fake array [1,2,3,4,5,6,7]
+        if (Array.isArray(parsed) && parsed.length === 7 && parsed[0] === 1 && parsed[6] === 7) {
+          localStorage.removeItem('da_completed_days');
+          return [];
+        }
+        return parsed;
+      } catch (e) {
+        return [];
+      }
+    }
+    return []; // Starts from Day 1 (0 days completed)
+  });
+
+  const [quizResults, setQuizResults] = useState<{ learnerId: string; day: number; score: number; maxScore: number }[]>(() => {
+    const saved = localStorage.getItem('da_quiz_results');
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [capstone, setCapstone] = useState<CapstoneSubmission | null>(() => {
@@ -220,22 +241,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [certificates, setCertificates] = useState<CertificateRecord[]>(() => {
     const saved = localStorage.getItem('da_certificates');
-    if (saved) return JSON.parse(saved);
-    return [
-      {
-        certificateId: 'SY-DA-2026-0001',
-        learnerId: 'learner_ananya_singh',
-        learnerName: 'Ananya Singh',
-        courseName: '12-Day Job-Oriented Data Analytics Certified Workshop Powered by Kapil',
-        duration: '12 Days (Hands-On + Industry Oriented)',
-        completionDate: '2026-03-18',
-        verificationUrl: '/verify/SY-DA-2026-0001',
-        status: 'VALID',
-        signerName: 'Kapil Narula',
-        signerTitle: 'Lead Analytics Instructor & Platform Director',
-        skillsCertified: ['SQL', 'BigQuery', 'Python', 'Pandas', 'Excel', 'Power BI', 'DAX', 'Storytelling', 'GenAI']
+    if (saved) {
+      try {
+        const list: CertificateRecord[] = JSON.parse(saved);
+        return list.filter(c => !c.learnerId?.includes('ananya') && !c.learnerId?.includes('aarav'));
+      } catch (e) {
+        return [];
       }
-    ];
+    }
+    return []; // No fake certificates pre-issued
   });
 
   const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
@@ -245,20 +259,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [notifications, setNotifications] = useState<PortalNotification[]>([
     {
-      id: 'notif-1',
-      title: 'Day 8 Assignment Available',
-      message: 'Automated Multi-Store ETL in Power Query has been published.',
-      timestamp: '2 hours ago',
-      type: 'assignment',
+      id: 'notif-welcome',
+      title: 'Welcome to Day 1',
+      message: 'Welcome to the 12-Day Job-Oriented Data Analytics Certified Workshop! Start Day 1 module.',
+      timestamp: 'Just now',
+      type: 'announcement',
       read: false
-    },
-    {
-      id: 'notif-2',
-      title: 'Feedback Received',
-      message: 'Your Day 2 SQL reconciliation assignment received 88/100.',
-      timestamp: '1 day ago',
-      type: 'feedback',
-      read: true
     }
   ]);
 
@@ -275,11 +281,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [cloudSyncStatus, setCloudSyncStatus] = useState<CloudSyncStatus>('synced');
 
   // UI Navigation & Modals State
-  const [activeView, setActiveView] = useState<string>('dashboard');
+  const [activeView, setActiveView] = useState<string>('landing');
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const [isProfileSetupOpen, setIsProfileSetupOpen] = useState<boolean>(false);
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState<boolean>(false);
-  const [isFirebaseSetupOpen, setIsFirebaseSetupOpen] = useState<boolean>(false);
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState<boolean>(false);
   const [currentVerifyingCertId, setCurrentVerifyingCertId] = useState<string | null>(null);
 
@@ -378,8 +383,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const submitCheckin = async (
     checkinData: Omit<DailyCheckinRecord, 'id' | 'learnerId' | 'learnerName' | 'date' | 'status' | 'timestamp'>
   ) => {
-    const learnerId = currentUser?.uid || 'learner_aarav_sharma';
-    const learnerName = currentUser?.name || 'Aarav Sharma';
+    const learnerId = currentUser?.uid || 'guest';
+    const learnerName = currentUser?.name || 'Enrolled Learner';
     const checkinId = `checkin_${learnerId}_day_${checkinData.day}`;
     const dateStr = new Date().toISOString().split('T')[0];
     const timestampStr = new Date().toISOString();
@@ -472,7 +477,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Calculations
   const calculateAttendancePercent = (learnerId: string): number => {
     const records = attendance.filter(a => a.learnerId === learnerId);
-    if (records.length === 0) return 100;
+    if (records.length === 0) return 0;
     const score = records.reduce((acc, r) => {
       if (r.status === 'present') return acc + 1;
       if (r.status === 'late') return acc + 0.5;
@@ -483,7 +488,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const calculateOverallProgress = (learnerId: string): number => {
     const isCurrentUser = currentUser?.uid === learnerId;
-    const daysDone = isCurrentUser ? completedDays.length : (learners.find(l => l.uid === learnerId)?.overallProgress ? Math.round((learners.find(l => l.uid === learnerId)!.overallProgress * 12) / 100) : 6);
+    const daysDone = isCurrentUser ? completedDays.length : (learners.find(l => l.uid === learnerId)?.overallProgress ? Math.round((learners.find(l => l.uid === learnerId)!.overallProgress * 12) / 100) : 0);
     const learnerSubs = submissions.filter(s => s.learnerId === learnerId);
     const subRate = Math.min(100, (learnerSubs.length / 12) * 100);
     const attRate = calculateAttendancePercent(learnerId);
@@ -493,8 +498,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const dailyScore = (daysDone / 12) * 100;
     const labScore = (daysDone / 12) * 100;
-    const assessmentScore = (daysDone / 12) * 90;
-    const capstoneScore = capstone?.status === 'submitted' || capstone?.status === 'evaluated' ? 100 : (daysDone >= 11 ? 50 : 0);
+    const learnerQuizzes = quizResults.filter(q => q.learnerId === learnerId);
+    const assessmentScore = learnerQuizzes.length > 0 
+      ? Math.round(learnerQuizzes.reduce((acc, q) => acc + (q.score / (q.maxScore || 1)) * 100, 0) / 12)
+      : 0;
+    const capstoneScore = isCurrentUser
+      ? (capstone?.status === 'evaluated' ? (capstone.score || 90) : (capstone?.status === 'submitted' ? 80 : 0))
+      : 0;
 
     const weighted =
       (dailyScore * w.dailyLearning +
@@ -509,17 +519,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const calculateJobReadiness = (learnerId: string) => {
     // Component breakdown: SQL, Python, Excel, Power BI, Visualization, Business Communication, Capstone
-    const att = calculateAttendancePercent(learnerId);
-    const daysDone = currentUser?.uid === learnerId ? completedDays.length : 8;
+    const isCurrentUser = currentUser?.uid === learnerId;
+    const daysDone = isCurrentUser ? completedDays.length : 0;
     const learnerSubs = submissions.filter(s => s.learnerId === learnerId);
 
-    const sqlScore = Math.min(100, Math.round(75 + (daysDone >= 3 ? 12 : 0) + (learnerSubs.some(s => s.day === 2) ? 8 : 0)));
-    const pythonScore = Math.min(100, Math.round(70 + (daysDone >= 6 ? 16 : 0) + (learnerSubs.some(s => s.day === 5) ? 7 : 0)));
-    const excelScore = Math.min(100, Math.round(80 + (daysDone >= 8 ? 14 : 0) + (learnerSubs.some(s => s.day === 7) ? 5 : 0)));
-    const powerBiScore = Math.min(100, Math.round(65 + (daysDone >= 10 ? 18 : 0) + (learnerSubs.some(s => s.day === 10) ? 8 : 0)));
-    const visualizationScore = Math.min(100, Math.round(72 + (daysDone >= 11 ? 16 : 0)));
-    const businessCommunicationScore = Math.min(100, Math.round(78 + (daysDone >= 9 ? 12 : 0)));
-    const capstoneScore = capstone?.status === 'evaluated' ? (capstone.score || 90) : (capstone?.status === 'submitted' ? 85 : (daysDone === 12 ? 60 : 40));
+    if (daysDone === 0 && learnerSubs.length === 0) {
+      return {
+        score: 0,
+        breakdown: {
+          sql: 0,
+          python: 0,
+          excel: 0,
+          powerBi: 0,
+          visualization: 0,
+          businessCommunication: 0,
+          capstone: 0
+        }
+      };
+    }
+
+    const sqlSubs = learnerSubs.filter(s => s.day === 2 || s.day === 3).length;
+    const sqlScore = Math.min(100, Math.round((daysDone >= 2 ? 40 : 0) + (daysDone >= 3 ? 30 : 0) + (sqlSubs * 15)));
+
+    const pySubs = learnerSubs.filter(s => s.day === 4 || s.day === 5 || s.day === 6).length;
+    const pythonScore = Math.min(100, Math.round((daysDone >= 4 ? 30 : 0) + (daysDone >= 5 ? 30 : 0) + (daysDone >= 6 ? 20 : 0) + (pySubs * 10)));
+
+    const excelSubs = learnerSubs.filter(s => s.day === 7 || s.day === 8).length;
+    const excelScore = Math.min(100, Math.round((daysDone >= 7 ? 40 : 0) + (daysDone >= 8 ? 40 : 0) + (excelSubs * 10)));
+
+    const pbiSubs = learnerSubs.filter(s => s.day === 9 || s.day === 10).length;
+    const powerBiScore = Math.min(100, Math.round((daysDone >= 9 ? 40 : 0) + (daysDone >= 10 ? 40 : 0) + (pbiSubs * 10)));
+
+    const visualizationScore = Math.min(100, Math.round((daysDone >= 11 ? 80 : 0) + (learnerSubs.some(s => s.day === 11) ? 20 : 0)));
+
+    const businessCommunicationScore = Math.min(100, Math.round((daysDone >= 1 ? 40 : 0) + (daysDone >= 12 ? 60 : 0)));
+
+    const capstoneScore = isCurrentUser && capstone?.status === 'evaluated'
+      ? (capstone.score || 90)
+      : (isCurrentUser && capstone?.status === 'submitted' ? 80 : 0);
 
     const overall = Math.round(
       sqlScore * 0.20 +
@@ -548,11 +585,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const checkCertificateEligibility = (learnerId: string) => {
     const att = calculateAttendancePercent(learnerId);
     const isCurrentUser = currentUser?.uid === learnerId;
-    const daysDone = isCurrentUser ? completedDays.length : 12;
+    const daysDone = isCurrentUser ? completedDays.length : 0;
     const attendanceMet = att >= settings.minAttendanceForCert;
     const modulesMet = daysDone >= 12;
     const assessmentsMet = daysDone >= 10;
-    const capstoneMet = isCurrentUser ? (capstone?.status === 'submitted' || capstone?.status === 'evaluated') : true;
+    const capstoneMet = isCurrentUser ? (capstone?.status === 'submitted' || capstone?.status === 'evaluated') : false;
 
     const reasons: string[] = [];
     if (!attendanceMet) reasons.push(`Attendance is ${att}%, minimum required is ${settings.minAttendanceForCert}%.`);
@@ -600,14 +637,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
       lastLoginAt: new Date().toISOString(),
       overallProgress: 0,
-      jobReadinessScore: 65,
+      jobReadinessScore: 0,
       certificateStatus: 'not_started',
       isDemo: false
     };
 
     setLearners(prev => [newUser, ...prev]);
     setCurrentUser(newUser);
-    setCompletedDays([1]); // First day accessible
+    setCompletedDays([]); // Clean start from Day 1 with 0 completed
     setIsProfileSetupOpen(false);
     setActiveView('dashboard');
   };
@@ -685,6 +722,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const submitQuizResult = (day: number, score: number, maxScore: number) => {
+    const learnerId = currentUser?.uid || 'guest';
+    const newRecord = { learnerId, day, score, maxScore };
+    setQuizResults(prev => {
+      const filtered = prev.filter(p => !(p.learnerId === learnerId && p.day === day));
+      const updated = [...filtered, newRecord];
+      try {
+        localStorage.setItem('da_quiz_results', JSON.stringify(updated));
+      } catch (e) {
+        // ignore
+      }
+      return updated;
+    });
+
     if (score >= maxScore * 0.7) {
       markDayComplete(day);
     }
@@ -882,7 +932,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       rows = learners.map(l => [
         `"${l.name}"`,
         calculateOverallProgress(l.uid),
-        currentUser?.uid === l.uid ? completedDays.length : 8,
+        currentUser?.uid === l.uid ? completedDays.length : (l.overallProgress ? Math.round((l.overallProgress * 12) / 100) : 0),
         calculateAttendancePercent(l.uid)
       ]);
     }
@@ -916,7 +966,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         selectedDay,
         isProfileSetupOpen,
         isAdminLoginOpen,
-        isFirebaseSetupOpen,
         isAiDrawerOpen,
         currentVerifyingCertId,
 
@@ -929,7 +978,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedDay,
         setIsProfileSetupOpen,
         setIsAdminLoginOpen,
-        setIsFirebaseSetupOpen,
         setIsAiDrawerOpen,
         setCurrentVerifyingCertId,
 
@@ -941,6 +989,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         markDayComplete,
         completedDays,
+        quizResults,
         submitQuizResult,
         submitAssignment,
         submitCapstone,

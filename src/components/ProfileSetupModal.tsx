@@ -77,7 +77,7 @@ export const ProfileSetupModal: React.FC = () => {
                 type="text"
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g. Aarav Sharma"
+                placeholder="Enter your full name"
                 className={`w-full px-3.5 py-2 rounded-lg bg-slate-800 border ${
                   errors.name ? 'border-rose-500' : 'border-slate-700'
                 } text-white focus:outline-none focus:border-indigo-500`}

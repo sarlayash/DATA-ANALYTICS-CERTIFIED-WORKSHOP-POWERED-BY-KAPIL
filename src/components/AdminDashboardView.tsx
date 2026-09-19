@@ -240,23 +240,33 @@ export const AdminDashboardView: React.FC = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-              {learners.slice(0, 4).map(l => (
-                <div key={l.uid} className="p-4 rounded-2xl bg-slate-900/60 border border-slate-750 space-y-2">
-                  <div className="flex items-center gap-2.5">
-                    <img src={l.photoURL} alt={l.name} className="w-8 h-8 rounded-full object-cover" />
-                    <div>
-                      <h4 className="text-xs font-bold text-white truncate max-w-[130px]">{l.name}</h4>
-                      <p className="text-[10px] text-slate-400 truncate max-w-[130px]">{l.college}</p>
+            {learners.length === 0 ? (
+              <div className="p-8 rounded-2xl bg-slate-900/40 border border-slate-800 text-center space-y-2">
+                <Users className="w-8 h-8 text-slate-500 mx-auto" />
+                <p className="text-sm font-semibold text-slate-300">No Learners Enrolled Yet</p>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  The cohort has started clean with 0 enrolled learners. As students register and onboard through the portal, their live progress and academic performance will display here.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                {learners.slice(0, 4).map(l => (
+                  <div key={l.uid} className="p-4 rounded-2xl bg-slate-900/60 border border-slate-750 space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <img src={l.photoURL} alt={l.name} className="w-8 h-8 rounded-full object-cover" />
+                      <div>
+                        <h4 className="text-xs font-bold text-white truncate max-w-[130px]">{l.name}</h4>
+                        <p className="text-[10px] text-slate-400 truncate max-w-[130px]">{l.college}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-800">
+                      <span className="text-slate-400">Progress:</span>
+                      <span className="font-mono text-cyan-300 font-bold">{calculateOverallProgress(l.uid)}%</span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-800">
-                    <span className="text-slate-400">Progress:</span>
-                    <span className="font-mono text-cyan-300 font-bold">{calculateOverallProgress(l.uid)}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -317,62 +327,76 @@ export const AdminDashboardView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {filteredLearners.map(l => {
-                  const prog = calculateOverallProgress(l.uid);
-                  const att = calculateAttendancePercent(l.uid);
-                  const ready = calculateJobReadiness(l.uid);
-                  const hasCert = certificates.some(c => c.learnerId === l.uid && c.status === 'VALID');
+                {filteredLearners.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-slate-400">
+                      <Users className="w-6 h-6 text-slate-500 mx-auto mb-2" />
+                      <p className="font-semibold text-slate-300">No Learners Found</p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {learners.length === 0
+                          ? "The workshop currently has 0 registered learners. When new students enroll, their records will populate here."
+                          : "No learners match your search query or selected filters."}
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredLearners.map(l => {
+                    const prog = calculateOverallProgress(l.uid);
+                    const att = calculateAttendancePercent(l.uid);
+                    const ready = calculateJobReadiness(l.uid);
+                    const hasCert = certificates.some(c => c.learnerId === l.uid && c.status === 'VALID');
 
-                  return (
-                    <tr key={l.uid} className="hover:bg-slate-800/60 transition">
-                      <td className="p-3.5">
-                        <div className="flex items-center gap-2.5">
-                          <img src={l.photoURL} alt={l.name} className="w-7 h-7 rounded-full object-cover" />
-                          <div>
-                            <p className="font-semibold text-white">{l.name}</p>
-                            <p className="text-[11px] text-slate-400">{l.email}</p>
+                    return (
+                      <tr key={l.uid} className="hover:bg-slate-800/60 transition">
+                        <td className="p-3.5">
+                          <div className="flex items-center gap-2.5">
+                            <img src={l.photoURL} alt={l.name} className="w-7 h-7 rounded-full object-cover" />
+                            <div>
+                              <p className="font-semibold text-white">{l.name}</p>
+                              <p className="text-[11px] text-slate-400">{l.email}</p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="p-3.5 text-slate-300">
-                        <p className="truncate max-w-[150px]">{l.college || 'Enterprise'}</p>
-                        <p className="text-[10px] text-slate-500">{l.course || 'Degree'}</p>
-                      </td>
-                      <td className="p-3.5 font-mono text-cyan-300 font-bold">{prog}%</td>
-                      <td className="p-3.5 font-mono text-emerald-400 font-bold">{att}%</td>
-                      <td className="p-3.5 font-mono text-indigo-300 font-bold">{ready.score}/100</td>
-                      <td className="p-3.5">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                          hasCert
-                            ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
-                            : 'text-amber-300 bg-amber-500/10 border-amber-500/30'
-                        }`}>
-                          {hasCert ? 'Issued' : 'Pending'}
-                        </span>
-                      </td>
-                      <td className="p-3.5 text-right space-x-1.5">
-                        {!hasCert ? (
-                          <button
-                            onClick={() => issueCertificate(l.uid)}
-                            className="px-2.5 py-1 rounded-lg bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30 border border-emerald-500/30 text-[11px] font-semibold transition"
-                          >
-                            Issue Cert
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              const c = certificates.find(cert => cert.learnerId === l.uid);
-                              if (c) revokeCertificate(c.certificateId);
-                            }}
-                            className="px-2.5 py-1 rounded-lg bg-rose-600/20 text-rose-300 hover:bg-rose-600/30 border border-rose-500/30 text-[11px] font-semibold transition"
-                          >
-                            Revoke
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                        </td>
+                        <td className="p-3.5 text-slate-300">
+                          <p className="truncate max-w-[150px]">{l.college || 'Enterprise'}</p>
+                          <p className="text-[10px] text-slate-500">{l.course || 'Degree'}</p>
+                        </td>
+                        <td className="p-3.5 font-mono text-cyan-300 font-bold">{prog}%</td>
+                        <td className="p-3.5 font-mono text-emerald-400 font-bold">{att}%</td>
+                        <td className="p-3.5 font-mono text-indigo-300 font-bold">{ready.score}/100</td>
+                        <td className="p-3.5">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            hasCert
+                              ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                              : 'text-amber-300 bg-amber-500/10 border-amber-500/30'
+                          }`}>
+                            {hasCert ? 'Issued' : 'Pending'}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-right space-x-1.5">
+                          {!hasCert ? (
+                            <button
+                              onClick={() => issueCertificate(l.uid)}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30 border border-emerald-500/30 text-[11px] font-semibold transition"
+                            >
+                              Issue Cert
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                const c = certificates.find(cert => cert.learnerId === l.uid);
+                                if (c) revokeCertificate(c.certificateId);
+                              }}
+                              className="px-2.5 py-1 rounded-lg bg-rose-600/20 text-rose-300 hover:bg-rose-600/30 border border-rose-500/30 text-[11px] font-semibold transition"
+                            >
+                              Revoke
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -413,42 +437,54 @@ export const AdminDashboardView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {learners.map(l => {
-                  const record = attendance.find(a => a.learnerId === l.uid && a.day === attendanceDay);
-                  const currentStatus = record?.status || 'present';
+                {learners.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="p-8 text-center text-slate-400">
+                      <CalendarCheck className="w-6 h-6 text-slate-500 mx-auto mb-2" />
+                      <p className="font-semibold text-slate-300">No Learners to Mark Attendance</p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Attendance registers will be populated automatically when learners enroll.
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  learners.map(l => {
+                    const record = attendance.find(a => a.learnerId === l.uid && a.day === attendanceDay);
+                    const currentStatus = record?.status || 'present';
 
-                  return (
-                    <tr key={l.uid} className="hover:bg-slate-800/60 transition">
-                      <td className="p-3.5 font-semibold text-white">{l.name}</td>
-                      <td className="p-3.5">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
-                          currentStatus === 'present'
-                            ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
-                            : currentStatus === 'late'
-                            ? 'text-amber-300 bg-amber-500/10 border-amber-500/30'
-                            : 'text-rose-300 bg-rose-500/10 border-rose-500/30'
-                        }`}>
-                          {currentStatus}
-                        </span>
-                      </td>
-                      <td className="p-3.5 text-right space-x-1.5">
-                        {(['present', 'late', 'absent', 'excused'] as AttendanceStatus[]).map(st => (
-                          <button
-                            key={st}
-                            onClick={() => markAttendance(l.uid, attendanceDay, st)}
-                            className={`px-2 py-1 rounded text-[10px] font-semibold uppercase transition ${
-                              currentStatus === st
-                                ? 'bg-indigo-600 text-white font-bold'
-                                : 'bg-slate-800 text-slate-400 hover:text-white'
-                            }`}
-                          >
-                            {st}
-                          </button>
-                        ))}
-                      </td>
-                    </tr>
-                  );
-                })}
+                    return (
+                      <tr key={l.uid} className="hover:bg-slate-800/60 transition">
+                        <td className="p-3.5 font-semibold text-white">{l.name}</td>
+                        <td className="p-3.5">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                            currentStatus === 'present'
+                              ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                              : currentStatus === 'late'
+                              ? 'text-amber-300 bg-amber-500/10 border-amber-500/30'
+                              : 'text-rose-300 bg-rose-500/10 border-rose-500/30'
+                          }`}>
+                            {currentStatus}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-right space-x-1.5">
+                          {(['present', 'late', 'absent', 'excused'] as AttendanceStatus[]).map(st => (
+                            <button
+                              key={st}
+                              onClick={() => markAttendance(l.uid, attendanceDay, st)}
+                              className={`px-2 py-1 rounded text-[10px] font-semibold uppercase transition ${
+                                currentStatus === st
+                                  ? 'bg-indigo-600 text-white font-bold'
+                                  : 'bg-slate-800 text-slate-400 hover:text-white'
+                              }`}
+                            >
+                              {st}
+                            </button>
+                          ))}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -467,7 +503,16 @@ export const AdminDashboardView: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            {submissions.map(sub => {
+            {submissions.length === 0 ? (
+              <div className="p-8 rounded-2xl bg-slate-900/40 border border-slate-800 text-center space-y-2">
+                <FileText className="w-8 h-8 text-slate-500 mx-auto" />
+                <p className="text-sm font-semibold text-slate-300">No Submissions Awaiting Grading</p>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  When learners submit practical deliverables or Capstone projects, their work will appear here with instant rubric scoring and feedback tools.
+                </p>
+              </div>
+            ) : (
+              submissions.map(sub => {
               const isGrading = gradingSubId === sub.id;
               return (
                 <div key={sub.id} className="p-4 rounded-2xl bg-slate-900/60 border border-slate-750 space-y-3">
@@ -553,7 +598,7 @@ export const AdminDashboardView: React.FC = () => {
                   )}
                 </div>
               );
-            })}
+            }))}
           </div>
         </div>
       )}

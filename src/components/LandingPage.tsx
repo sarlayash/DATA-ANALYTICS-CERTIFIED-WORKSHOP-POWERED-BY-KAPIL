@@ -1,7 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_DAYS } from '../data/curriculumData';
-import { DEMO_LEARNERS } from '../data/initialData';
 import {
   GraduationCap,
   Sparkles,
@@ -17,7 +16,8 @@ import {
   ShieldAlert,
   Users,
   Compass,
-  Briefcase
+  Briefcase,
+  ShieldCheck
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
@@ -25,6 +25,29 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 pb-20">
+      {/* Top Simple Landing Header */}
+      <header className="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-500/20">
+            <LineChart className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="font-extrabold text-sm sm:text-base text-white tracking-tight block">
+              12-Day Data Analytics Workshop
+            </span>
+            <span className="text-[10px] text-slate-400 block -mt-0.5">Powered by Kapil</span>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setIsAdminLoginOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700 transition cursor-pointer"
+        >
+          <ShieldCheck className="w-3.5 h-3.5 text-rose-400" />
+          <span>Admin Portal</span>
+        </button>
+      </header>
+
       {/* Hero Section */}
       <section className="relative pt-16 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center overflow-hidden">
         <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-25">
@@ -75,7 +98,7 @@ export const LandingPage: React.FC = () => {
               <path fill="#FBBC05" d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.4s.2-1.6.4-2.4L1.6 7c-.7 1.5-1.1 3.2-1.1 5s.4 3.5 1.1 5l3.7-2.3z" />
               <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.3-6.7-5.3L1.6 15.3C3.5 19.1 7.4 23 12 23z" />
             </svg>
-            <span>Continue with Google</span>
+            <span>Enroll as Learner</span>
           </button>
 
           <a
@@ -85,37 +108,6 @@ export const LandingPage: React.FC = () => {
             <Compass className="w-5 h-5 text-cyan-400" />
             <span>Explore Program</span>
           </a>
-        </div>
-
-        {/* Quick Demo Persona Tester for Evaluators */}
-        <div className="mt-12 p-4 bg-slate-800/60 border border-slate-700/80 rounded-2xl max-w-3xl mx-auto text-left">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <span className="text-xs uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-indigo-400" />
-              Quick Demo Access (Section 38 Demo Cohort)
-            </span>
-            <span className="text-[11px] text-indigo-400">1-Click Instant Preview</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {DEMO_LEARNERS.map(l => (
-              <button
-                key={l.uid}
-                onClick={() => loginWithGoogle(l)}
-                className="p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-750 hover:border-indigo-500/50 text-left transition cursor-pointer group"
-              >
-                <div className="flex items-center gap-2">
-                  <img src={l.photoURL} alt={l.name} className="w-6 h-6 rounded-full object-cover" />
-                  <span className="text-xs font-semibold text-slate-200 group-hover:text-indigo-300 truncate">
-                    {l.name}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
-                  <span>Day {Math.round((l.overallProgress * 12) / 100)}/12</span>
-                  <span className="font-mono text-cyan-400">{l.jobReadinessScore} Score</span>
-                </div>
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Mandatory Independent Training Disclaimer */}

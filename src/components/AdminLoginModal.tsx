@@ -4,8 +4,8 @@ import { ShieldCheck, Lock, User, AlertCircle, CheckCircle2, X } from 'lucide-re
 
 export const AdminLoginModal: React.FC = () => {
   const { isAdminLoginOpen, setIsAdminLoginOpen, loginAsAdmin } = useApp();
-  const [username, setUsername] = useState('kapiladmin');
-  const [password, setPassword] = useState('admin123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -60,7 +60,7 @@ export const AdminLoginModal: React.FC = () => {
               id="admin-username-input"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              placeholder="kapiladmin"
+              placeholder="Enter admin username"
               className="w-full px-3.5 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-rose-500 font-mono"
               required
             />
@@ -75,19 +75,10 @@ export const AdminLoginModal: React.FC = () => {
               id="admin-password-input"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Enter admin password"
               className="w-full px-3.5 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-rose-500 font-mono"
               required
             />
-          </div>
-
-          <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-750 text-[11px] text-slate-400 space-y-1">
-            <p className="font-semibold text-slate-300">Bootstrap Credentials (Section 37):</p>
-            <p className="font-mono text-slate-400">Username: <span className="text-rose-300">kapiladmin</span></p>
-            <p className="font-mono text-slate-400">Password: <span className="text-rose-300">admin123</span></p>
-            <p className="text-[10px] text-slate-500 pt-1">
-              * Verified through backend authorization (`/api/admin/login`). Password is never exposed in client bundle.
-            </p>
           </div>
 
           <div className="pt-2 flex items-center justify-end gap-3">
