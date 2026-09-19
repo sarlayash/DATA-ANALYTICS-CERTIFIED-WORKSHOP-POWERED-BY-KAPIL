@@ -306,28 +306,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const userRef = doc(db, 'users', firebaseUser.uid);
           const userSnap = await getDoc(userRef);
           const isAdminUser = firebaseUser.email === 'kapilnarula27july@gmail.com';
+          const googlePhoto = firebaseUser.photoURL || null;
+          const effectiveName = firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner');
 
           let profile: UserProfile;
           if (userSnap.exists()) {
             profile = userSnap.data() as UserProfile;
-            profile.name = profile.name || firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner');
-            profile.photoURL = profile.photoURL || firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
+            // Always adopt real Google profile picture & displayName when available
+            if (googlePhoto) {
+              profile.photoURL = googlePhoto;
+              profile.profilePhoto = googlePhoto;
+            }
+            if (firebaseUser.displayName) {
+              profile.name = firebaseUser.displayName;
+            }
             if (isAdminUser) profile.role = 'admin';
-            await setDoc(userRef, { lastLoginAt: new Date().toISOString() }, { merge: true });
+
+            await setDoc(
+              userRef,
+              {
+                lastLoginAt: new Date().toISOString(),
+                ...(googlePhoto ? { photoURL: googlePhoto, profilePhoto: googlePhoto } : {}),
+                ...(firebaseUser.displayName ? { name: firebaseUser.displayName } : {})
+              },
+              { merge: true }
+            );
           } else {
-            // Immediately initialize user document in Firestore without any profile filling forms
+            // Immediately initialize new learner document in Firestore with real Google photo and details
+            const userPhoto = googlePhoto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
             profile = {
               uid: firebaseUser.uid,
-              name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner'),
+              name: effectiveName,
               email: firebaseUser.email || '',
-              photoURL: firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+              photoURL: userPhoto,
+              profilePhoto: userPhoto,
               role: isAdminUser ? 'admin' : 'learner',
               phone: firebaseUser.phoneNumber || '',
               college: '',
               course: '',
               graduationYear: '',
               experienceLevel: '',
-              careerGoal: '',
+              careerGoal: 'Data Analyst',
               city: '',
               linkedin: '',
               github: '',
@@ -738,30 +757,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (firebaseUser) {
         const userRef = doc(db, 'users', firebaseUser.uid);
         const isAdminUser = firebaseUser.email === 'kapilnarula27july@gmail.com';
+        const googlePhoto = firebaseUser.photoURL || null;
+        const effectiveName = firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner');
         let profile: UserProfile;
 
         try {
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             profile = userSnap.data() as UserProfile;
-            profile.name = profile.name || firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner');
-            profile.photoURL = profile.photoURL || firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
+            // Always adopt real Google profile picture & displayName when available
+            if (googlePhoto) {
+              profile.photoURL = googlePhoto;
+              profile.profilePhoto = googlePhoto;
+            }
+            if (firebaseUser.displayName) {
+              profile.name = firebaseUser.displayName;
+            }
             if (isAdminUser) profile.role = 'admin';
-            await setDoc(userRef, { lastLoginAt: new Date().toISOString() }, { merge: true });
+
+            await setDoc(
+              userRef,
+              {
+                lastLoginAt: new Date().toISOString(),
+                ...(googlePhoto ? { photoURL: googlePhoto, profilePhoto: googlePhoto } : {}),
+                ...(firebaseUser.displayName ? { name: firebaseUser.displayName } : {})
+              },
+              { merge: true }
+            );
           } else {
-            // New user enrolled via Firebase Google Auth - NO PROFILE FILLING REQUIRED
+            // New learner enrolled directly via Google Auth - NO PROFILE FILLING REQUIRED
+            const userPhoto = googlePhoto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
             profile = {
               uid: firebaseUser.uid,
-              name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner'),
+              name: effectiveName,
               email: firebaseUser.email || '',
-              photoURL: firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+              photoURL: userPhoto,
+              profilePhoto: userPhoto,
               role: isAdminUser ? 'admin' : 'learner',
               phone: firebaseUser.phoneNumber || '',
               college: '',
               course: '',
               graduationYear: '',
               experienceLevel: '',
-              careerGoal: '',
+              careerGoal: 'Data Analyst',
               city: '',
               linkedin: '',
               github: '',
@@ -776,18 +814,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         } catch (dbErr: any) {
           console.warn('Firestore write warning during Google login:', dbErr);
+          const userPhoto = googlePhoto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
           profile = {
             uid: firebaseUser.uid,
-            name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner'),
+            name: effectiveName,
             email: firebaseUser.email || '',
-            photoURL: firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+            photoURL: userPhoto,
+            profilePhoto: userPhoto,
             role: isAdminUser ? 'admin' : 'learner',
             phone: firebaseUser.phoneNumber || '',
             college: '',
             course: '',
             graduationYear: '',
             experienceLevel: '',
-            careerGoal: '',
+            careerGoal: 'Data Analyst',
             city: '',
             linkedin: '',
             github: '',
@@ -823,6 +863,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // User closed popup; no loud alert needed
       } else if (err.code === 'auth/popup-blocked') {
         setAuthError('Google sign-in popup was blocked by your browser. Please allow popups for this site or open in a new tab.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setAuthError('This domain is not authorized in Firebase. Please add this domain to Authorized Domains in Firebase Console > Authentication > Settings.');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setAuthError('Google Sign-In is not enabled for this project. Please enable Google in Firebase Console under Authentication > Sign-in method.');
       } else {
         setAuthError(err.message || 'Google Authentication failed. Please try again.');
       }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { UserAvatar } from './UserAvatar';
 import {
   GraduationCap,
   Sparkles,
@@ -115,10 +116,11 @@ export const Navbar: React.FC = () => {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 transition cursor-pointer"
                 >
-                  <img
-                    src={currentUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'}
-                    alt={currentUser.name}
-                    className="w-7 h-7 rounded-full object-cover ring-1 ring-indigo-500/50"
+                  <UserAvatar
+                    src={currentUser.photoURL || currentUser.profilePhoto}
+                    name={currentUser.name}
+                    size="sm"
+                    showBorder
                   />
                   <div className="text-left hidden md:block">
                     <div className="text-xs font-semibold text-slate-200 leading-tight flex items-center gap-1.5">
@@ -140,10 +142,18 @@ export const Navbar: React.FC = () => {
 
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-72 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-2 z-50">
-                    <div className="px-3 py-2 border-b border-slate-700 mb-2">
-                      <p className="text-xs text-slate-400">Signed in as</p>
-                      <p className="text-sm font-semibold text-slate-100 truncate">{currentUser.name}</p>
-                      <p className="text-xs text-indigo-400 font-mono">{currentUser.role.toUpperCase()}</p>
+                    <div className="px-3 py-2 border-b border-slate-700 mb-2 flex items-center gap-3">
+                      <UserAvatar
+                        src={currentUser.photoURL || currentUser.profilePhoto}
+                        name={currentUser.name}
+                        size="md"
+                        showBorder
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-slate-400">Signed in as</p>
+                        <p className="text-sm font-semibold text-slate-100 truncate">{currentUser.name}</p>
+                        <p className="text-xs text-indigo-400 font-mono">{currentUser.role.toUpperCase()}</p>
+                      </div>
                     </div>
 
                     {learners.length > 1 && (
@@ -163,8 +173,11 @@ export const Navbar: React.FC = () => {
                                 currentUser.uid === l.uid ? 'bg-indigo-600/30 text-indigo-200 font-medium' : 'text-slate-300 hover:bg-slate-700'
                               }`}
                             >
-                              <span className="truncate">{l.name}</span>
-                              <span className="text-[10px] text-slate-400">{l.overallProgress}%</span>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <UserAvatar src={l.photoURL || l.profilePhoto} name={l.name} size="xs" />
+                                <span className="truncate">{l.name}</span>
+                              </div>
+                              <span className="text-[10px] text-slate-400 shrink-0 ml-2">{l.overallProgress}%</span>
                             </button>
                           ))}
                         </div>

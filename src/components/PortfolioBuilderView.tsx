@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { UserAvatar } from './UserAvatar';
 import {
   UserCheck,
   Award,
@@ -84,12 +85,14 @@ Summary: ${capstone?.problemStatement || 'Enterprise multi-channel margin and re
       {/* Main Portfolio Card */}
       <div className="p-6 sm:p-8 rounded-3xl bg-slate-800/50 border border-slate-750 space-y-6">
         {/* Profile Info Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-750">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-755">
           <div className="flex items-center gap-4">
-            <img
-              src={currentUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'}
-              alt={currentUser.name}
-              className="w-16 h-16 rounded-2xl object-cover ring-2 ring-indigo-500"
+            <UserAvatar
+              src={currentUser.photoURL || currentUser.profilePhoto}
+              name={currentUser.name}
+              size="xl"
+              showBorder
+              className="ring-2 ring-indigo-500 rounded-2xl"
             />
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-white">{currentUser.name}</h2>

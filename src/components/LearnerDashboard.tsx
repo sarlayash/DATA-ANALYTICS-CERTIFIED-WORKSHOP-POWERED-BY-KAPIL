@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { DailyProgressCheckin } from './DailyProgressCheckin';
+import { UserAvatar } from './UserAvatar';
 import {
   GraduationCap,
   Sparkles,
@@ -104,20 +105,29 @@ export const LearnerDashboard: React.FC = () => {
       {/* Header Banner (Section 7) */}
       <div className="relative p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 shadow-xl overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold border border-indigo-500/30">
-              <GraduationCap className="w-3.5 h-3.5" />
-              <span>Cohort 2026 • Professional Data Analytics</span>
+          <div className="flex items-start sm:items-center gap-4 sm:gap-5">
+            <UserAvatar
+              src={currentUser.photoURL || currentUser.profilePhoto}
+              name={currentUser.name}
+              size="xl"
+              showBorder
+              className="ring-4 ring-indigo-500/20 shadow-2xl rounded-2xl"
+            />
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold border border-indigo-500/30">
+                <GraduationCap className="w-3.5 h-3.5" />
+                <span>Cohort 2026 • Professional Data Analytics</span>
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Welcome, {currentUser.name}
+              </h1>
+              <p className="text-base sm:text-lg font-medium text-slate-300 italic">
+                "Your Journey From Learning To Employability"
+              </p>
+              <p className="text-xs text-slate-400 max-w-2xl pt-0.5">
+                {currentUser.email} • Target: {currentUser.careerGoal || 'Data Analyst'}
+              </p>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Welcome, {currentUser.name}
-            </h1>
-            <p className="text-base sm:text-lg font-medium text-slate-300 italic">
-              "Your Journey From Learning To Employability"
-            </p>
-            <p className="text-xs text-slate-400 max-w-2xl pt-1">
-              {currentUser.course || 'B.Tech / Analytics'} • {currentUser.college || 'Enterprise Track'} • Target: {currentUser.careerGoal || 'Data Analyst'}
-            </p>
           </div>
 
           {/* Progress Ring Card */}

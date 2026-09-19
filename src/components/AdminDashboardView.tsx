@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { AttendanceStatus } from '../types';
+import { UserAvatar } from './UserAvatar';
 import {
   BarChart3,
   Users,
@@ -253,10 +254,10 @@ export const AdminDashboardView: React.FC = () => {
                 {learners.slice(0, 4).map(l => (
                   <div key={l.uid} className="p-4 rounded-2xl bg-slate-900/60 border border-slate-750 space-y-2">
                     <div className="flex items-center gap-2.5">
-                      <img src={l.photoURL} alt={l.name} className="w-8 h-8 rounded-full object-cover" />
+                      <UserAvatar src={l.photoURL || l.profilePhoto} name={l.name} size="sm" />
                       <div>
                         <h4 className="text-xs font-bold text-white truncate max-w-[130px]">{l.name}</h4>
-                        <p className="text-[10px] text-slate-400 truncate max-w-[130px]">{l.college}</p>
+                        <p className="text-[10px] text-slate-400 truncate max-w-[130px]">{l.college || l.email}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-800">
@@ -350,7 +351,7 @@ export const AdminDashboardView: React.FC = () => {
                       <tr key={l.uid} className="hover:bg-slate-800/60 transition">
                         <td className="p-3.5">
                           <div className="flex items-center gap-2.5">
-                            <img src={l.photoURL} alt={l.name} className="w-7 h-7 rounded-full object-cover" />
+                            <UserAvatar src={l.photoURL || l.profilePhoto} name={l.name} size="sm" />
                             <div>
                               <p className="font-semibold text-white">{l.name}</p>
                               <p className="text-[11px] text-slate-400">{l.email}</p>

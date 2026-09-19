@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { UserAvatar } from './UserAvatar';
 import {
   Trophy,
   Award,
@@ -84,11 +85,13 @@ export const LeaderboardView: React.FC = () => {
                 #{idx + 1}
               </div>
 
-              <img
-                src={learner.photoURL}
-                alt={learner.name}
-                className="w-16 h-16 rounded-full object-cover ring-2 ring-indigo-500 mt-1"
-              ></img>
+              <UserAvatar
+                src={learner.photoURL || learner.profilePhoto}
+                name={learner.name}
+                size="lg"
+                showBorder
+                className="mt-1"
+              />
 
               <div>
                 <h3 className="font-bold text-white text-base">{learner.name}</h3>
@@ -134,7 +137,7 @@ export const LeaderboardView: React.FC = () => {
                     <td className="p-3.5 font-mono font-bold text-slate-400">#{index + 1}</td>
                     <td className="p-3.5">
                       <div className="flex items-center gap-2.5">
-                        <img src={l.photoURL} alt={l.name} className="w-7 h-7 rounded-full object-cover" />
+                        <UserAvatar src={l.photoURL || l.profilePhoto} name={l.name} size="sm" />
                         <div>
                           <p className="font-semibold text-white">{l.name}</p>
                           <p className="text-[10px] text-slate-400">{l.college || 'Enterprise'}</p>
