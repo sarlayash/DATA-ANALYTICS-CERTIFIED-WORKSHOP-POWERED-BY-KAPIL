@@ -21,7 +21,15 @@ import {
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
-  const { loginWithGoogle, setIsAdminLoginOpen, setActiveView, setSelectedDay } = useApp();
+  const {
+    loginWithGoogle,
+    isAuthLoading,
+    authError,
+    clearAuthError,
+    setIsAdminLoginOpen,
+    setActiveView,
+    setSelectedDay
+  } = useApp();
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 pb-20">
@@ -89,16 +97,27 @@ export const LandingPage: React.FC = () => {
         {/* CTAs */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
+            id="btn-landing-google-enroll"
             onClick={() => loginWithGoogle()}
-            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-base shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5 cursor-pointer"
+            disabled={isAuthLoading}
+            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-base shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5 cursor-pointer"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.3 8.9 5 12 5z" />
-              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" />
-              <path fill="#FBBC05" d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.4s.2-1.6.4-2.4L1.6 7c-.7 1.5-1.1 3.2-1.1 5s.4 3.5 1.1 5l3.7-2.3z" />
-              <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.3-6.7-5.3L1.6 15.3C3.5 19.1 7.4 23 12 23z" />
-            </svg>
-            <span>Enroll as Learner</span>
+            {isAuthLoading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Connecting to Google...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.3 8.9 5 12 5z" />
+                  <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" />
+                  <path fill="#FBBC05" d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.4s.2-1.6.4-2.4L1.6 7c-.7 1.5-1.1 3.2-1.1 5s.4 3.5 1.1 5l3.7-2.3z" />
+                  <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.3-6.7-5.3L1.6 15.3C3.5 19.1 7.4 23 12 23z" />
+                </svg>
+                <span>Enroll with Google</span>
+              </>
+            )}
           </button>
 
           <a
@@ -109,6 +128,18 @@ export const LandingPage: React.FC = () => {
             <span>Explore Program</span>
           </a>
         </div>
+
+        {authError && (
+          <div className="mt-4 p-3.5 rounded-xl bg-red-950/80 border border-red-500/40 text-red-200 text-xs sm:text-sm max-w-lg mx-auto flex items-center justify-between gap-3 text-left shadow-lg">
+            <span>{authError}</span>
+            <button
+              onClick={clearAuthError}
+              className="p-1 text-red-400 hover:text-white rounded hover:bg-red-900/50 transition cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Mandatory Independent Training Disclaimer */}
         <div className="mt-8 flex items-center justify-center gap-2 text-xs text-slate-400 max-w-2xl mx-auto bg-slate-800/40 p-3 rounded-xl border border-slate-800">

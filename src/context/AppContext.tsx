@@ -26,11 +26,13 @@ import {
   INITIAL_ATTENDANCE,
   INITIAL_SUBMISSIONS
 } from '../data/initialData';
-import { db } from '../lib/firebase';
+import { auth, googleProvider, db } from '../lib/firebase';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
   doc,
   setDoc,
+  getDoc,
   getDocs,
   onSnapshot
 } from 'firebase/firestore';
@@ -55,7 +57,10 @@ interface AppContextType {
   isAiDrawerOpen: boolean;
   currentVerifyingCertId: string | null;
 
-  // Firebase Firestore Check-ins & Cloud Status
+  // Firebase Auth & Cloud Sync
+  isAuthLoading: boolean;
+  authError: string | null;
+  clearAuthError: () => void;
   checkins: DailyCheckinRecord[];
   cloudSyncStatus: CloudSyncStatus;
   submitCheckin: (checkinData: Omit<DailyCheckinRecord, 'id' | 'learnerId' | 'learnerName' | 'date' | 'status' | 'timestamp'>) => Promise<void>;
@@ -69,9 +74,9 @@ interface AppContextType {
   setIsAiDrawerOpen: (open: boolean) => void;
   setCurrentVerifyingCertId: (id: string | null) => void;
 
-  loginWithGoogle: (demoUser?: UserProfile) => void;
+  loginWithGoogle: (demoUser?: UserProfile) => Promise<void>;
   loginAsAdmin: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   completeProfileSetup: (profileData: Partial<UserProfile>) => void;
   switchUser: (uid: string) => void;
 
@@ -280,6 +285,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   const [cloudSyncStatus, setCloudSyncStatus] = useState<CloudSyncStatus>('synced');
 
+  // Firebase Auth Loading & Error State
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const clearAuthError = () => setAuthError(null);
+
   // UI Navigation & Modals State
   const [activeView, setActiveView] = useState<string>('landing');
   const [selectedDay, setSelectedDay] = useState<number>(1);
@@ -287,6 +297,111 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState<boolean>(false);
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState<boolean>(false);
   const [currentVerifyingCertId, setCurrentVerifyingCertId] = useState<string | null>(null);
+
+  // Firebase Authentication State Listener (Keeps session in sync automatically)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userRef = doc(db, 'users', firebaseUser.uid);
+          const userSnap = await getDoc(userRef);
+          const isAdminUser = firebaseUser.email === 'kapilnarula27july@gmail.com';
+
+          let profile: UserProfile;
+          if (userSnap.exists()) {
+            profile = userSnap.data() as UserProfile;
+            profile.name = profile.name || firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner');
+            profile.photoURL = profile.photoURL || firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
+            if (isAdminUser) profile.role = 'admin';
+            await setDoc(userRef, { lastLoginAt: new Date().toISOString() }, { merge: true });
+          } else {
+            // Immediately initialize user document in Firestore without any profile filling forms
+            profile = {
+              uid: firebaseUser.uid,
+              name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner'),
+              email: firebaseUser.email || '',
+              photoURL: firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+              role: isAdminUser ? 'admin' : 'learner',
+              phone: firebaseUser.phoneNumber || '',
+              college: '',
+              course: '',
+              graduationYear: '',
+              experienceLevel: '',
+              careerGoal: '',
+              city: '',
+              linkedin: '',
+              github: '',
+              createdAt: new Date().toISOString(),
+              lastLoginAt: new Date().toISOString(),
+              overallProgress: 0,
+              jobReadinessScore: 0,
+              certificateStatus: 'not_started',
+              isDemo: false
+            };
+            await setDoc(userRef, profile);
+          }
+
+          setCurrentUser(profile);
+          localStorage.setItem('da_current_user', JSON.stringify(profile));
+          setLearners(prev => {
+            const exists = prev.some(l => l.uid === profile.uid);
+            if (exists) return prev.map(l => l.uid === profile.uid ? profile : l);
+            return [profile, ...prev];
+          });
+          setIsProfileSetupOpen(false);
+          setActiveView(prev => (prev === 'landing' ? (profile.role === 'admin' ? 'admin' : 'dashboard') : prev));
+        } catch (e) {
+          console.warn('Firebase user sync on auth state change note:', e);
+        }
+      } else {
+        setCurrentUser(prev => {
+          if (prev && !prev.uid.startsWith('admin_')) {
+            localStorage.removeItem('da_current_user');
+            return null;
+          }
+          return prev;
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Real-time sync for enrolled learners from Firestore
+  useEffect(() => {
+    try {
+      const usersCol = collection(db, 'users');
+      const unsubscribe = onSnapshot(
+        usersCol,
+        snapshot => {
+          const remoteUsers: UserProfile[] = [];
+          snapshot.forEach(docSnap => {
+            const d = docSnap.data() as UserProfile;
+            if (d && d.role === 'learner') {
+              remoteUsers.push(d);
+            }
+          });
+          if (remoteUsers.length > 0) {
+            setLearners(prev => {
+              const map = new Map<string, UserProfile>();
+              prev.forEach(p => map.set(p.uid, p));
+              remoteUsers.forEach(r => map.set(r.uid, r));
+              const merged = Array.from(map.values());
+              localStorage.setItem('da_learners', JSON.stringify(merged));
+              return merged;
+            });
+          }
+        },
+        error => {
+          console.warn('Firestore learners subscription notice:', error.message);
+        }
+      );
+
+      return () => unsubscribe();
+    } catch (e: any) {
+      console.warn('Firestore learners init note:', e.message);
+    }
+  }, []);
 
   // Firestore Real-time Sync for Checkins
   useEffect(() => {
@@ -608,14 +723,112 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Auth Handlers
-  const loginWithGoogle = (demoUser?: UserProfile) => {
+  const loginWithGoogle = async (demoUser?: UserProfile) => {
     if (demoUser) {
       setCurrentUser(demoUser);
       setActiveView('dashboard');
       return;
     }
-    // New user profile onboarding
-    setIsProfileSetupOpen(true);
+
+    setIsAuthLoading(true);
+    setAuthError(null);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const firebaseUser = result.user;
+      if (firebaseUser) {
+        const userRef = doc(db, 'users', firebaseUser.uid);
+        const isAdminUser = firebaseUser.email === 'kapilnarula27july@gmail.com';
+        let profile: UserProfile;
+
+        try {
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            profile = userSnap.data() as UserProfile;
+            profile.name = profile.name || firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner');
+            profile.photoURL = profile.photoURL || firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
+            if (isAdminUser) profile.role = 'admin';
+            await setDoc(userRef, { lastLoginAt: new Date().toISOString() }, { merge: true });
+          } else {
+            // New user enrolled via Firebase Google Auth - NO PROFILE FILLING REQUIRED
+            profile = {
+              uid: firebaseUser.uid,
+              name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner'),
+              email: firebaseUser.email || '',
+              photoURL: firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+              role: isAdminUser ? 'admin' : 'learner',
+              phone: firebaseUser.phoneNumber || '',
+              college: '',
+              course: '',
+              graduationYear: '',
+              experienceLevel: '',
+              careerGoal: '',
+              city: '',
+              linkedin: '',
+              github: '',
+              createdAt: new Date().toISOString(),
+              lastLoginAt: new Date().toISOString(),
+              overallProgress: 0,
+              jobReadinessScore: 0,
+              certificateStatus: 'not_started',
+              isDemo: false
+            };
+            await setDoc(userRef, profile);
+          }
+        } catch (dbErr: any) {
+          console.warn('Firestore write warning during Google login:', dbErr);
+          profile = {
+            uid: firebaseUser.uid,
+            name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Learner'),
+            email: firebaseUser.email || '',
+            photoURL: firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+            role: isAdminUser ? 'admin' : 'learner',
+            phone: firebaseUser.phoneNumber || '',
+            college: '',
+            course: '',
+            graduationYear: '',
+            experienceLevel: '',
+            careerGoal: '',
+            city: '',
+            linkedin: '',
+            github: '',
+            createdAt: new Date().toISOString(),
+            lastLoginAt: new Date().toISOString(),
+            overallProgress: 0,
+            jobReadinessScore: 0,
+            certificateStatus: 'not_started',
+            isDemo: false
+          };
+        }
+
+        setCurrentUser(profile);
+        localStorage.setItem('da_current_user', JSON.stringify(profile));
+        setLearners(prev => {
+          const exists = prev.some(l => l.uid === profile.uid);
+          if (exists) return prev.map(l => l.uid === profile.uid ? profile : l);
+          return [profile, ...prev];
+        });
+
+        // ABSOLUTELY NO PROFILE FILLING
+        setIsProfileSetupOpen(false);
+
+        if (profile.role === 'admin') {
+          setActiveView('admin');
+        } else {
+          setActiveView('dashboard');
+        }
+      }
+    } catch (err: any) {
+      console.error('Firebase Google Sign-In Error:', err);
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        // User closed popup; no loud alert needed
+      } else if (err.code === 'auth/popup-blocked') {
+        setAuthError('Google sign-in popup was blocked by your browser. Please allow popups for this site or open in a new tab.');
+      } else {
+        setAuthError(err.message || 'Google Authentication failed. Please try again.');
+      }
+    } finally {
+      setIsAuthLoading(false);
+    }
   };
 
   const completeProfileSetup = (profileData: Partial<UserProfile>) => {
@@ -698,8 +911,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.warn('Sign out warning:', err);
+    }
     setCurrentUser(null);
+    localStorage.removeItem('da_current_user');
     setActiveView('landing');
   };
 
@@ -969,6 +1188,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isAiDrawerOpen,
         currentVerifyingCertId,
 
+        // Firebase Auth & Cloud Sync
+        isAuthLoading,
+        authError,
+        clearAuthError,
         checkins,
         cloudSyncStatus,
         submitCheckin,

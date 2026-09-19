@@ -20,6 +20,9 @@ export const Navbar: React.FC = () => {
     learners,
     logout,
     loginWithGoogle,
+    isAuthLoading,
+    authError,
+    clearAuthError,
     setIsAdminLoginOpen,
     setIsAiDrawerOpen,
     activeView,
@@ -143,29 +146,30 @@ export const Navbar: React.FC = () => {
                       <p className="text-xs text-indigo-400 font-mono">{currentUser.role.toUpperCase()}</p>
                     </div>
 
-                    {/* Quick Demo Learner Switcher */}
-                    <div className="px-2 py-1 mb-2">
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5">
-                        Switch Learner Persona (Demo Mode)
-                      </p>
-                      <div className="space-y-1">
-                        {learners.map(l => (
-                          <button
-                            key={l.uid}
-                            onClick={() => {
-                              switchUser(l.uid);
-                              setShowUserMenu(false);
-                            }}
-                            className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition ${
-                              currentUser.uid === l.uid ? 'bg-indigo-600/30 text-indigo-200 font-medium' : 'text-slate-300 hover:bg-slate-700'
-                            }`}
-                          >
-                            <span className="truncate">{l.name}</span>
-                            <span className="text-[10px] text-slate-400">{l.overallProgress}%</span>
-                          </button>
-                        ))}
+                    {learners.length > 1 && (
+                      <div className="px-2 py-1 mb-2">
+                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5">
+                          Enrolled Cohort Members ({learners.length})
+                        </p>
+                        <div className="space-y-1 max-h-32 overflow-y-auto">
+                          {learners.map(l => (
+                            <button
+                              key={l.uid}
+                              onClick={() => {
+                                switchUser(l.uid);
+                                setShowUserMenu(false);
+                              }}
+                              className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition ${
+                                currentUser.uid === l.uid ? 'bg-indigo-600/30 text-indigo-200 font-medium' : 'text-slate-300 hover:bg-slate-700'
+                              }`}
+                            >
+                              <span className="truncate">{l.name}</span>
+                              <span className="text-[10px] text-slate-400">{l.overallProgress}%</span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="border-t border-slate-700 pt-1">
                       {currentUser.role !== 'admin' && (
@@ -207,15 +211,25 @@ export const Navbar: React.FC = () => {
               <button
                 id="btn-google-login"
                 onClick={() => loginWithGoogle()}
-                className="flex items-center gap-2 px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition cursor-pointer"
+                disabled={isAuthLoading}
+                className="flex items-center gap-2 px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white shadow-lg shadow-indigo-600/30 transition cursor-pointer"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.3 8.9 5 12 5z" />
-                  <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" />
-                  <path fill="#FBBC05" d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.4s.2-1.6.4-2.4L1.6 7c-.7 1.5-1.1 3.2-1.1 5s.4 3.5 1.1 5l3.7-2.3z" />
-                  <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.3-6.7-5.3L1.6 15.3C3.5 19.1 7.4 23 12 23z" />
-                </svg>
-                <span>Continue with Google</span>
+                {isAuthLoading ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.3 8.9 5 12 5z" />
+                      <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" />
+                      <path fill="#FBBC05" d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.4s.2-1.6.4-2.4L1.6 7c-.7 1.5-1.1 3.2-1.1 5s.4 3.5 1.1 5l3.7-2.3z" />
+                      <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.3-6.7-5.3L1.6 15.3C3.5 19.1 7.4 23 12 23z" />
+                    </svg>
+                    <span>Continue with Google</span>
+                  </>
+                )}
               </button>
             </div>
           )}

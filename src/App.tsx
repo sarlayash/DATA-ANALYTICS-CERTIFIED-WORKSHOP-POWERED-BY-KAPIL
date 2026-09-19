@@ -3,7 +3,6 @@ import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { LandingPage } from './components/LandingPage';
-import { ProfileSetupModal } from './components/ProfileSetupModal';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { AIAssistantDrawer } from './components/AIAssistantDrawer';
 
@@ -38,7 +37,6 @@ const MainAppContent: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
         <LandingPage />
-        <ProfileSetupModal />
         <AdminLoginModal />
       </div>
     );
@@ -101,7 +99,6 @@ const MainAppContent: React.FC = () => {
       </div>
 
       {/* Global Modals & AI Coach Assistant Drawer */}
-      <ProfileSetupModal />
       <AdminLoginModal />
       <AIAssistantDrawer />
     </div>
