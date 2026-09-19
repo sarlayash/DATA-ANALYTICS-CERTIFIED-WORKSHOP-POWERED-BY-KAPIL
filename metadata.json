@@ -1,0 +1,6 @@
+{
+  "name": "Data Analytics Certified Workshop Portal",
+  "description": "Enterprise Learning Management Platform for the 12-Day Job-Oriented Data Analytics Certified Workshop powered by Kapil.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
